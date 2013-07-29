@@ -1,0 +1,33 @@
+<?php
+$this->headTitle('Uploaded Files');
+?>
+<h2><?php echo $this->escapeHtml('You can add this files to collection or delete it'); ?></h2>
+<p>
+    <a class="btn" href="<?php echo $this->url('storage', array('action' => 'upload')); ?>">Upload audio tracks</a>
+    <a class="btn" href="<?php echo $this->url('audio', array('action' => 'index')); ?>">See my audio collection</a>
+    <a class="btn btn-danger" href="<?php echo $this->url('storage', array('action' => 'clear')); ?>">Clear upload storage</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Upload date</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($list as $audioEntry) : ?>
+            <tr>
+                <td><?php echo $this->escapeHtml($audioEntry->filename); ?></td>
+                <td><?php echo $this->escapeHtml($audioEntry->uploaded); ?></td>
+                <td>
+                    <a class="btn btn-small btn-success" href="<?php echo $this->url('storage', array('action' => 'approve', 'id' => $audioEntry->id));
+            ?>">Approve</a>
+                    <a class="btn btn-small btn-danger" href="<?php echo $this->url('storage', array('action' => 'delete', 'id' => $audioEntry->id));
+            ?>">Delete</a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

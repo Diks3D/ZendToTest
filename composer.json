@@ -8,7 +8,14 @@
     ],
     "homepage": "http://framework.zend.com/",
     "require": {
-        "php": ">=5.3.3",
-        "zendframework/zendframework": ">2.2.0rc1"
+        "php": ">=5.4.0",
+        "zendframework/zendframework": ">2.2.0rc1",
+        "zendframework/zend-developer-tools": "dev-master",
+        "doctrine/doctrine-orm-module": "0.7.*",
+        "doctrine/orm": "2.3.4",
+        "doctrine/dbal": "2.3.4",
+        "nass600/get-id3": "dev-master",
+        "phpunit/phpunit": "3.7.*",
+        "phpunit/dbunit": ">=1.2"
     }
 }

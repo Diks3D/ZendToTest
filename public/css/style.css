@@ -35,3 +35,30 @@ div.container a.brand {
     margin-left: 0;
     padding: 8px 20px 12px 40px;
 }
+
+thead {
+    background-color: gray;
+    color: white;
+}
+
+th.adminname-th,
+th.datetime-th{
+    min-width: 130px;
+}
+
+th.manage-th{
+    width: 120px;
+}
+
+tbody.message-tr{
+    border: solid 2px black;
+}
+
+#resetbutton {
+    margin-left: 20px;
+}
+
+.btn.manage-btn {
+    margin-bottom: 5px;
+    min-width: 100px;
+}
