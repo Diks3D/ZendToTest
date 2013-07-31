@@ -1,12 +1,15 @@
 <?php
 $title = 'DashBoard';
 $this->headTitle($title);
+$role = $this->layout()->role;
 ?>
 <h1><?php echo $this->escapeHtml('Messages list'); ?></h1>
 <p>
     <a class="btn" href="<?php echo $this->url('dashboard/messages', array('action' => 'add')); ?>">Add new message</a>
-    <a class="btn" href="<?php echo $this->url('dashboard/user', array('action' => 'index')); ?>">User managment</a>
-    <a class="btn btn-danger" href="<?php echo $this->url('dashboard', array('action' => 'clear')); ?>">Clear DashBoard</a>
+    <?php if ($role == 'admin') { ?>
+        <a class="btn" href="<?php echo $this->url('dashboard/user', array('action' => 'index')); ?>">User managment</a>
+        <a class="btn btn-danger" href="<?php echo $this->url('dashboard', array('action' => 'clear')); ?>">Clear DashBoard</a>
+    <?php } ?>
 </p>
 
 <table class="table table-bordered">

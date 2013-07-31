@@ -2,13 +2,15 @@
 
 namespace Audio;
 
-use Audio\Model;
-use Audio\Model\Template;
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\TableGateway\TableGateway;
+use Audio\Model,
+    Audio\Model\Template,
+    Zend\Db\ResultSet\ResultSet,
+    Zend\Db\TableGateway\TableGateway,
+    Zend\ModuleManager\Feature\AutoloaderProviderInterface,
+    Zend\EventManager\StaticEventManager;
  
-class Module
-{
+class Module implements AutoloaderProviderInterface
+{   
     public function getAutoloaderConfig()
     {
         return array(

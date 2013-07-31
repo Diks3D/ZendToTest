@@ -4,6 +4,7 @@ namespace Dashboard\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use Zend\Authentication\AuthenticationService;
 use DoctrineORMModule\Stdlib\Hydrator\DoctrineEntity;
 use Dashboard\Entity\Message;
 use Dashboard\Form\MessageForm;
@@ -26,7 +27,7 @@ class DashboardController extends AbstractActionController
         $form = new MessageForm();
         $form->setHydrator(new DoctrineEntity($em, 'Dashboard\Entity\Message'))
             ->setObject(new Message())
-            //->setInputFilter(new ReferenzwertFilter())
+            //->setInputFilter(new MessageFilter())
             ->setAttribute('method', 'post');
         
         $errorMessage = '';

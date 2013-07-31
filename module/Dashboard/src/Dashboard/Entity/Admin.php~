@@ -5,10 +5,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  *  @ORM\Entity
- *  @ORM\Table(name="ad_user")
- *  @ORM\HasLifecycleCallbacks()
+ *  @ORM\Table(name="ad_admin")
  */
-class User
+class Admin
 {
     /**
      * @ORM\Id
@@ -42,44 +41,6 @@ class User
      * @var string
      */
     protected $info;
-
-   /**
-     *  @ORM\Column(type="datetime")
-     *  @var \DateTime
-     */
-    protected $created;
-    
-    /**
-     *  @ORM\Column(name="last_login", type="datetime")
-     *  @var \DateTime
-     */
-    protected $lastLogin;
-
-    /**
-     * @ORM\prePersist
-     */
-    public function setCreatedValue()
-    {
-        $this->created = new \DateTime();
-    }
-    
-    /**
-     * @ORM\prePersist
-     * @ORM\preUpdate
-     */
-    public function setLastLoginValue()
-    {
-        $this->lastLogin = new \DateTime();
-    }
-    
-    /**
-     * @ORM\prePersist
-     */
-    public function setInfoValue()
-    {
-        $simpleXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><info></info>');
-        $this->info = $simpleXml->asXML();
-    }
     
     /** Magic getter and setter */
     public function __get($name)
@@ -114,7 +75,7 @@ class User
      * Set login
      *
      * @param string $login
-     * @return User
+     * @return Admin
      */
     public function setLogin($login)
     {
@@ -137,7 +98,7 @@ class User
      * Set email
      *
      * @param string $email
-     * @return User
+     * @return Admin
      */
     public function setEmail($email)
     {
@@ -160,7 +121,7 @@ class User
      * Set passHash
      *
      * @param string $passHash
-     * @return User
+     * @return Admin
      */
     public function setPassHash($passHash)
     {
@@ -183,7 +144,7 @@ class User
      * Set fullName
      *
      * @param string $fullName
-     * @return User
+     * @return Admin
      */
     public function setFullName($fullName)
     {
@@ -206,7 +167,7 @@ class User
      * Set info
      *
      * @param \stdClass $info
-     * @return User
+     * @return Admin
      */
     public function setInfo($info)
     {
@@ -224,51 +185,4 @@ class User
     {
         return $this->info;
     }
-
-    /**
-     * Set created
-     *
-     * @param \DateTime $created
-     * @return User
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    
-        return $this;
-    }
-
-    /**
-     * Get created
-     *
-     * @return \DateTime 
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * Set lastLogin
-     *
-     * @param \DateTime $lastLogin
-     * @return User
-     */
-    public function setLastLogin($lastLogin)
-    {
-        $this->lastLogin = $lastLogin;
-    
-        return $this;
-    }
-
-    /**
-     * Get lastLogin
-     *
-     * @return \DateTime 
-     */
-    public function getLastLogin()
-    {
-        return $this->lastLogin;
-    }
-
 }

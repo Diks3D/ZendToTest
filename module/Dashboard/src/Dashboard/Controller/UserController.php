@@ -3,17 +3,34 @@ namespace Dashboard\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use Zend\Authentication\AuthenticationService;
+use DoctrineORMModule\Stdlib\Hydrator\DoctrineEntity;
 use Dashboard\Form\UserForm;
-use Dashboard\Entity;
+//use Dashboard\Form\UserFormFilter;
+use Dashboard\Entity\User;
 
 class UserController extends AbstractActionController
 {
+    public function dispatch(\Zend\Stdlib\RequestInterface $request, \Zend\Stdlib\ResponseInterface $response = null)
+    {
+        parent::dispatch($request, $response);
+        
+        $auth = new AuthenticationService();
+        if ($auth->hasIdentity()) {
+            $user = $auth->getIdentity();
+            if (is_a($user, 'Dashboard\Entity\Admin')) {
+                $this->layout()->setVariable('admin', true);
+                $this->layout()->setVariable('user', $user);
+                return;
+            }
+        }
+        return $this->redirect()->toRoute('dashboard');
+    }
 
     public function indexAction()
     {
-        $objectManager = $this->getServiceLocator()
-            ->get('Doctrine\ORM\EntityManager');
-        $userRepository = $objectManager->getRepository('Dashboard\Entity\User');
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $userRepository = $em->getRepository('Dashboard\Entity\User');
         $list = $userRepository->findAll();
         return array(
             'users' => $list,
@@ -23,36 +40,28 @@ class UserController extends AbstractActionController
     public function addAction()
     {
         $form = new UserForm();
-        var_dump($form); exit;
-        
-        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-
-        $user = new Entity\User();
-        $user->login = 'dimonna';
-        $user->email = 'dimonna@email.ru';
-        $user->passHash = md5('Abcd12345');
-        $user->fullName = 'Dimonna Tester';
-
-        $objectManager->persist($user);
-        $objectManager->flush();
-
-        die(var_dump($user->getId())); // yes, I'm lazy
-
-        $form = new AlbumForm();
-        $form->get('submit')->setValue('Add');
+        $form->get('submit')->setValue('Add User');
 
         $request = $this->getRequest();
         if ($request->isPost()) {
-            $album = new Album();
-            $form->setInputFilter($album->getInputFilter());
+            
+            //$filter = new UserFormFilter();
+            //$form->setInputFilter($filter->getInputFilter());
             $form->setData($request->getPost());
-
             if ($form->isValid()) {
-                $album->exchangeArray($form->getData());
-                $this->getAlbumTable()->saveAlbum($album);
+                $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+                $formData = $form->getData();
+
+                $user = new User();
+                $user->login = $formData['login'];
+                $user->email = $formData['email'];
+                $user->passHash = md5($formData['password']);
+                $user->fullName = $formData['fullname'];
+                $em->persist($user);
+                $em->flush();
 
                 // Redirect to list of albums
-                return $this->redirect()->toRoute('album');
+                return $this->redirect()->toRoute('dashboard/user');
             }
         }
         return array('form' => $form);
@@ -62,58 +71,106 @@ class UserController extends AbstractActionController
     {
         $id = (int) $this->params()->fromRoute('id', 0);
         if (!$id) {
-            return $this->redirect()->toRoute('album', array(
-                    'action' => 'add'
-                ));
+            return $this->redirect()->toRoute('dashboard/user', array('action' => 'add'));
         }
-        $album = $this->getAlbumTable()->getAlbum($id);
 
-        $form = new AlbumForm();
-        $form->bind($album);
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $user = $em->find('Dashboard\Entity\User', $id);
+        
+        $form = new UserForm();
+        //$filter = new UserFormFilter();
+        ///$form->setInputFilter($filter->getInputFilter());
+        $form->setValidationGroup('login','email','fullname');
         $form->get('submit')->setAttribute('value', 'Edit');
 
         $request = $this->getRequest();
         if ($request->isPost()) {
-            $form->setInputFilter($album->getInputFilter());
             $form->setData($request->getPost());
-
-            if ($form->isValid()) {
-                $this->getAlbumTable()->saveAlbum($form->getData());
+            if ($form->isValid()) {  
+                $formData = $form->getData();
+                $user->login = $formData['login'];
+                $user->email = $formData['email'];
+                $user->fullName = $formData['fullname'];
+                $em->persist($user);
+                $em->flush();
 
                 // Redirect to list of albums
-                return $this->redirect()->toRoute('album');
+                return $this->redirect()->toRoute('dashboard/user');
             }
-        }
+        } else {
+            $form->setData(array(
+                'login' => $user->login,
+                'email' => $user->email,
+                'fullname' => $user->fullName,
+            ));
+        }       
 
         return array(
-            'id' => $id,
             'form' => $form,
+            'user' => $user,
+        );
+    }
+    
+    public function changepassAction()
+    {
+        $id = (int) $this->params()->fromRoute('id', 0);
+        if (!$id) {
+            return $this->redirect()->toRoute('dashboard/user');
+        }
+
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $user = $em->find('Dashboard\Entity\User', $id);
+        
+        $form = new UserForm();
+        //$filter = new UserFormFilter();
+        //$form->setInputFilter($filter->getInputFilter());
+        $form->setValidationGroup('password','confirm');
+        $form->get('submit')->setAttribute('value', 'Change');
+
+        $request = $this->getRequest();
+        if ($request->isPost()) {
+            $form->setData($request->getPost());
+            if ($form->isValid()) {  
+                $formData = $form->getData();
+                $user->passHash = md5($formData['password']);
+                $em->persist($user);
+                $em->flush();
+
+                // Redirect to list of albums
+                return $this->redirect()->toRoute('dashboard/user');
+            }
+        }     
+
+        return array(
+            'form' => $form,
+            'user' => $user,
         );
     }
 
     public function deleteAction()
-    {
+    {        
         $id = (int) $this->params()->fromRoute('id', 0);
         if (!$id) {
-            return $this->redirect()->toRoute('album');
+            return $this->redirect()->toRoute('dashboard/user');
         }
-
+ 
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $user = $em->find('Dashboard\Entity\User', $id);
+        
         $request = $this->getRequest();
         if ($request->isPost()) {
-            $del = $request->getPost('del', 'No');
-
+            $del = $request->getPost('delete', 'No');    
             if ($del == 'Yes') {
-                $id = (int) $request->getPost('id');
-                $this->getAlbumTable()->deleteAlbum($id);
+                $em->remove($user);
+                $em->flush();
             }
-
-            // Redirect to list of albums
-            return $this->redirect()->toRoute('album');
+ 
+            // Redirect to list of messages
+            return $this->redirect()->toRoute('dashboard/user');
         }
-
+ 
         return array(
-            'id' => $id,
-            'album' => $this->getAlbumTable()->getAlbum($id)
+            'user' => $user,
         );
     }
 

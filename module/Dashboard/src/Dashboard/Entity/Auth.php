@@ -1,21 +1,21 @@
 <?php
+
 namespace Dashboard\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  *  @ORM\Entity
- *  @ORM\Table(name="ad_admin")
+ *  @ORM\Table(name="ad_auth_storage")
+ *  @ORM\HasLifecycleCallbacks()
  */
-class Admin
+class Auth
 {
     /**
      * @ORM\Id
-     * @ORM\OneToMany(targetEntity="Message", cascade={"ALL"})
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @ORM\OneToOne(targetEntity="User")
      */
-    protected $id;
+    protected $userId;
     
     /**
      * @ORM\Column(type="string", unique=true, length=100)
@@ -28,20 +28,38 @@ class Admin
     protected $email;
     
     /** 
-     * @ORM\Column(name="pass_hash", type="string", length=32)
+     * @ORM\Column(name="token_hash", type="string", length=40)
      */
-    protected $passHash;
-    
-    /** 
-     * @ORM\Column(name="full_name", type="string")
+    protected $token;
+
+   /**
+     *  @ORM\Column(type="start_time", type="datetime")
+     *  @var \DateTime
      */
-    protected $fullName;
+    protected $startTime;
     
     /**
-     * @ORM\Column(name="info_xml", type="text")
-     * @var string
+     *  @ORM\Column(name="end_time", type="datetime")
+     *  @var \DateTime
      */
-    protected $info;
+    protected $endTime;
+
+    /**
+     * @ORM\prePersist
+     * @var \DateTime
+     */
+    public function setStartTimeValue()
+    {
+        $this->startTime = new \DateTime();
+    }
+    
+    /**
+     * @ORM\prePersist
+     */
+    public function setEndTimeValue()
+    {
+        $this->endTime = new \DateTime();
+    }
     
     /** Magic getter and setter */
     public function __get($name)
@@ -60,23 +78,35 @@ class Admin
         }
         throw new \Exception('class ' . __CLASS__ . ' has no ' . $MethodName . ' method!');
     }
-    
 
     /**
-     * Get id
+     * Set userId
+     *
+     * @param integer $userId
+     * @return Auth
+     */
+    public function setUserId($userId)
+    {
+        $this->userId = $userId;
+    
+        return $this;
+    }
+
+    /**
+     * Get userId
      *
      * @return integer 
      */
-    public function getId()
+    public function getUserId()
     {
-        return $this->id;
+        return $this->userId;
     }
 
     /**
      * Set login
      *
      * @param string $login
-     * @return Admin
+     * @return Auth
      */
     public function setLogin($login)
     {
@@ -99,7 +129,7 @@ class Admin
      * Set email
      *
      * @param string $email
-     * @return Admin
+     * @return Auth
      */
     public function setEmail($email)
     {
@@ -119,71 +149,71 @@ class Admin
     }
 
     /**
-     * Set passHash
+     * Set token
      *
-     * @param string $passHash
-     * @return Admin
+     * @param string $token
+     * @return Auth
      */
-    public function setPassHash($passHash)
+    public function setToken($token)
     {
-        $this->passHash = $passHash;
+        $this->token = $token;
     
         return $this;
     }
 
     /**
-     * Get passHash
+     * Get token
      *
      * @return string 
      */
-    public function getPassHash()
+    public function getToken()
     {
-        return $this->passHash;
+        return $this->token;
     }
 
     /**
-     * Set fullName
+     * Set startTime
      *
-     * @param string $fullName
-     * @return Admin
+     * @param \DateTime $startTime
+     * @return Auth
      */
-    public function setFullName($fullName)
+    public function setStartTime($startTime)
     {
-        $this->fullName = $fullName;
+        $this->startTime = $startTime;
     
         return $this;
     }
 
     /**
-     * Get fullName
+     * Get startTime
      *
-     * @return string 
+     * @return \DateTime 
      */
-    public function getFullName()
+    public function getStartTime()
     {
-        return $this->fullName;
+        return $this->startTime;
     }
 
     /**
-     * Set info
+     * Set endTime
      *
-     * @param \stdClass $info
-     * @return Admin
+     * @param \DateTime $endTime
+     * @return Auth
      */
-    public function setInfo($info)
+    public function setEndTime($endTime)
     {
-        $this->info = $info;
+        $this->endTime = $endTime;
     
         return $this;
     }
 
     /**
-     * Get info
+     * Get endTime
      *
-     * @return \stdClass 
+     * @return \DateTime 
      */
-    public function getInfo()
+    public function getEndTime()
     {
-        return $this->info;
+        return $this->endTime;
     }
 }

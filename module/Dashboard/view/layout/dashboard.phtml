@@ -43,7 +43,14 @@
                             <li><a href="<?php echo $this->url('dashboard') ?>"><?php echo $this->translate('DashBoard') ?></a></li>
                         </ul>
                     </div><!--/.nav-collapse -->
+                    <?php if(isset($auth)){ ?>
+                        <a class="btn btn-warning logout-btn" href="<?php echo $this->url('logout') ?>">Logout</a>
+                        <span class="current-user <?= ($role == 'admin') ? ' admin' : ''; ?>"><?= $auth->fullName; ?></span>
+                    <?php }  else { ?>
+                        <a class="btn btn-info logout-btn" href="<?php echo $this->url('userauth') ?>">Login</a>
+                    <?php } ?>
                 </div>
+                
             </div>
         </div>
         <div class="container">

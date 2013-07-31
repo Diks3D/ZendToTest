@@ -4,9 +4,8 @@ namespace AlbumTest\Model;
 use Album\Model\AlbumTable;
 use Album\Model\Album;
 use Zend\Db\ResultSet\ResultSet;
-use PHPUnit_Framework_TestCase;
 
-class AlbumTableTest extends PHPUnit_Framework_TestCase
+class AlbumTableTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testFetchAllReturnsAllAlbums()
@@ -110,8 +109,8 @@ class AlbumTableTest extends PHPUnit_Framework_TestCase
 
         try {
             $albumTable->getAlbum(123);
-        } catch (Exception $e) {
-            $this->assertSame('Could not find row 123', $e->getMessage());
+        } catch (\Exception $e) {
+            $this->assertEquals('Could not find row 123', $e->getMessage());
             return;
         }
 

@@ -5,7 +5,7 @@ return array(
         'invokables' => array(
             'Audio\Controller\Audio' => 'Audio\Controller\AudioController',
             'Audio\Controller\Upload' => 'Audio\Controller\UploadController',
-            'Audio\Controller\Message' => 'Audio\Controller\MessageController'
+            'Audio\Controller\Message' => 'Audio\Controller\MessageController',
         ),
     ),
     'router' => array(
