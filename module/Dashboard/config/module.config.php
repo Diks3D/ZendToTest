@@ -4,7 +4,6 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Dashboard\Controller\User' => 'Dashboard\Controller\UserController',
-            'Dashboard\Controller\Auth' => 'Dashboard\Controller\AuthController',
             'Dashboard\Controller\Dashboard' => 'Dashboard\Controller\DashboardController',
         ),
     ),
@@ -48,39 +47,6 @@ return array(
                                 'action' => 'index',
                             ),
                         ),
-                    ),
-                ),
-            ),
-            'userauth' => array(
-                'type' => 'literal',
-                'may_terminate' => true,
-                'options' => array(
-                    'route' => '/dashboard/auth',
-                    'defaults' => array(
-                        'controller' => 'Dashboard\Controller\Auth',
-                        'action' => 'auth',
-                    ),
-                ),
-            ),
-            'adminauth' => array(
-                'type' => 'literal',
-                'may_terminate' => true,
-                'options' => array(
-                    'route' => '/dashboard/admin',
-                    'defaults' => array(
-                        'controller' => 'Dashboard\Controller\Auth',
-                        'action' => 'adminauth',
-                    ),
-                ),
-            ),
-            'logout' => array(
-                'type' => 'literal',
-                'may_terminate' => true,
-                'options' => array(
-                    'route' => '/dashboard/logout',
-                    'defaults' => array(
-                        'controller' => 'Dashboard\Controller\Auth',
-                        'action' => 'logout',
                     ),
                 ),
             ),

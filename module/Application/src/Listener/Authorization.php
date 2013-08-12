@@ -1,14 +1,12 @@
 <?php
 
-namespace Dashboard\Listener;
+namespace Application\Listener;
 
-use Zend\Authentication\AuthenticationService,
-    Zend\EventManager\EventManagerInterface,
+use Zend\EventManager\EventManagerInterface,
     Zend\EventManager\ListenerAggregateInterface,
-    Zend\EventManager\EventInterface,
     Zend\Mvc\MvcEvent;
 
-class AuthListener implements ListenerAggregateInterface
+class Authorization implements ListenerAggregateInterface
 {
     protected $user;
     protected $role;
@@ -42,7 +40,7 @@ class AuthListener implements ListenerAggregateInterface
     public function mvcPreDispatch(MvcEvent $event)
     {
         $sm = $event->getTarget()->getServiceManager();
-        $authEvent = $sm->get('Dashboard\Event\Authentication');
+        $authEvent = $sm->get('Application\Event\Authentication');
         return $authEvent->preDispatch($event);
     }
 }

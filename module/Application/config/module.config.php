@@ -20,33 +20,36 @@ return array(
                     ),
                 ),
             ),
-            // The following is a route to simplify getting started creating
-            // new controllers and actions without needing to create a new
-            // module. Simply drop new controllers in, and you can access them
-            // using the path /application/:controller/:action
-            'application' => array(
-                'type'    => 'Literal',
+            'userauth' => array(
+                'type' => 'literal',
+                'may_terminate' => true,
                 'options' => array(
-                    'route'    => '/application',
+                    'route' => '/auth',
                     'defaults' => array(
-                        '__NAMESPACE__' => 'Application\Controller',
-                        'controller'    => 'Index',
-                        'action'        => 'index',
+                        'controller' => 'Dashboard\Controller\Auth',
+                        'action' => 'auth',
                     ),
                 ),
+            ),
+            'adminauth' => array(
+                'type' => 'literal',
                 'may_terminate' => true,
-                'child_routes' => array(
-                    'default' => array(
-                        'type'    => 'Segment',
-                        'options' => array(
-                            'route'    => '/[:controller[/:action]]',
-                            'constraints' => array(
-                                'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
-                            ),
-                            'defaults' => array(
-                            ),
-                        ),
+                'options' => array(
+                    'route' => '/admin/auth',
+                    'defaults' => array(
+                        'controller' => 'Application\Controller\Auth',
+                        'action' => 'adminauth',
+                    ),
+                ),
+            ),
+            'logout' => array(
+                'type' => 'literal',
+                'may_terminate' => true,
+                'options' => array(
+                    'route' => '/logout',
+                    'defaults' => array(
+                        'controller' => 'Application\Controller\Auth',
+                        'action' => 'logout',
                     ),
                 ),
             ),
@@ -73,7 +76,8 @@ return array(
     ),
     'controllers' => array(
         'invokables' => array(
-            'Application\Controller\Index' => 'Application\Controller\IndexController'
+            'Application\Controller\Index' => 'Application\Controller\IndexController',
+            'Application\Controller\Auth' => 'Application\Controller\AuthController',
         ),
     ),
     'view_manager' => array(

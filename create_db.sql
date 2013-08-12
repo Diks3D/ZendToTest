@@ -1,59 +1,17 @@
-DROP DATABASE IF EXISTS zend_2_test;
-CREATE DATABASE zend_2_test;
-USE zend_2_test;
+DROP DATABASE IF EXISTS zend_to_test;
+CREATE DATABASE zend_to_test;
+USE zend_to_test;
 
-CREATE TABLE users (
-  id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  login VARCHAR(20) NOT NULL,
-  pass VARCHAR(41) NOT NULL,
-  email VARCHAR(100) NOT NULL,
-  xml VARCHAR(15),
-  last_login TIMESTAMP,
-  INDEX (login)
+CREATE TABLE z2t_admin (
+  id INT(2) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  login VARCHAR(30) NOT NULL,
+  email VARCHAR(50) NOT NULL,
+  full_name VARCHAR(150) NOT NULL,
+  pass_hash VARCHAR(40) NOT NULL,
+  created DATETIME NOT NULL,
+  last_login DATETIME NOT NULL,
+  INDEX (login, email)
 );
 
-CREATE TABLE album (
-    id INT(2) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100),
-    artist VARCHAR(100)
-);
-
-CREATE TABLE audio_collection (
-    id INT(6) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    filename VARCHAR(150) NOT NULL,
-    artist VARCHAR(150),
-    title VARCHAR(150),
-    genre_id INT(4) UNSIGNED,
-    md5_hash VARCHAR(50) NOT NULL,
-    filepath VARCHAR(255) NOT NULL,
-    tags TEXT,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated TIMESTAMP NOT NULL,
-    INDEX(artist, title, filename, updated, genre_id),
-    FOREIGN KEY (genre_id) REFERENCES audio_genries(id)
-);
-
-CREATE TABLE id3v1_genries (
-    id INT(3) UNSIGNED NOT NULL PRIMARY KEY,
-    genre VARCHAR(255) NOT NULL,
-);
-
-CREATE TABLE id3v2_genries (
-    id INT(3) UNSIGNED NOT NULL PRIMARY KEY,
-    genre VARCHAR(255) NOT NULL,
-);
-
-CREATE TABLE audio_genries (
-    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    genre VARCHAR(255) NOT NULL,
-);
-
-CREATE TABLE temp_storage (
-    id INT(6) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    filename VARCHAR(150) NOT NULL,
-    filepath VARCHAR(255) NOT NULL,
-    uploaded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX(uploaded)
-);
-
-GRANT ALL PRIVILEGES ON zend_2_test.* TO 'admin'@'localhost' IDENTIFIED BY 'Abcd12345';
+GRANT ALL PRIVILEGES ON zend_to_test.* TO 'admin'@'localhost' IDENTIFIED BY 'Abcd12345';
+GRANT ALL PRIVILEGES ON zend_to_test.* TO 'doctrine'@'localhost' IDENTIFIED BY 'DoctrinePass';

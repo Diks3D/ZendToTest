@@ -1,13 +1,13 @@
 <?php
 
-namespace Dashboard\Controller;
+namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Authentication\AuthenticationService;
-use Dashboard\Form\AuthForm;
-use Dashboard\Model\Auth\Adapter\User as UserAuthAdapter;
-use Dashboard\Model\Auth\Adapter\Admin as AdminAuthAdapter;
+use Application\Form\AuthForm;
+use Application\Model\Auth\Adapter\User as UserAuthAdapter;
+use Application\Model\Auth\Adapter\Admin as AdminAuthAdapter;
 
 class AuthController extends AbstractActionController
 {
@@ -27,7 +27,7 @@ class AuthController extends AbstractActionController
                 $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
                 $result = $auth->authenticate(new UserAuthAdapter($login, $password, $em));
                 if($result->isValid()){
-                    return $this->redirect()->toRoute('dashboard');
+                    return $this->redirect()->toRoute('home');
                 } else {
                     $form->setMessages(array('login' => $result->getMessages()));
                 }
@@ -55,7 +55,7 @@ class AuthController extends AbstractActionController
                 $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
                 $result = $auth->authenticate(new AdminAuthAdapter($login, $password, $em));
                 if($result->isValid()){
-                    return $this->redirect()->toRoute('dashboard');
+                    return $this->redirect()->toRoute('admin');
                 }
             }
         }
@@ -79,12 +79,9 @@ class AuthController extends AbstractActionController
             $confirm = $request->getPost('logout', 'No');    
             if ($confirm == 'Yes') {
                 $auth->clearIdentity();
-                return $this->redirect()->toRoute('userauth');
             }
- 
-            // Redirect to list of messages
-            return $this->redirect()->toRoute('dashboard/messages');
         }
+        return $this->redirect()->toRoute('home');
  
         return array(
             'user' => $user,
