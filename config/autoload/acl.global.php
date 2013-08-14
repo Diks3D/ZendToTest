@@ -9,7 +9,7 @@ return array(
         ),
         'resources' => array(
             'allow' => array(
-                'Application\Controller\Auth' => array(
+                'Dashboard\Controller\Auth' => array(
                     'auth' => 'guest',
                     'adminauth' => 'guest',
                     'logout' => 'user',

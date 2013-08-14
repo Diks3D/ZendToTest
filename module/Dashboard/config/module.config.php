@@ -4,6 +4,7 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Dashboard\Controller\User' => 'Dashboard\Controller\UserController',
+            'Dashboard\Controller\Auth' => 'Dashboard\Controller\AuthController',
             'Dashboard\Controller\Dashboard' => 'Dashboard\Controller\DashboardController',
         ),
     ),
@@ -57,8 +58,7 @@ return array(
             'dashboard/layout' => __DIR__ . '/../view/layout/dashboard.phtml',
         ),
         'template_path_stack' => array(
-            'user' => __DIR__ . '/../view',
-            'dashboard' => __DIR__ . '/../view',
+            __DIR__ . '/../view',
         ),
     ),
     'doctrine' => array(

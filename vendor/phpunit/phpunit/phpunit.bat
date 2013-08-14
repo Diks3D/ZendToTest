@@ -33,14 +33,11 @@ REM LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 REM ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 REM POSSIBILITY OF SUCH DAMAGE.
 REM
-REM "php_bin": "c:/php/php.exe",
-REM "bin-dir": "D:/www/Zend2/test/vendor/phpunit/phpunit/"
-REM
 
-if "%PHPBIN%" == "" set PHPBIN="C:\php\php.exe"
+if "%PHPBIN%" == "" set PHPBIN=@php_bin@
 if not exist "%PHPBIN%" if "%PHP_PEAR_PHP_BIN%" neq "" goto USE_PEAR_PATH
 GOTO RUN
 :USE_PEAR_PATH
 set PHPBIN=%PHP_PEAR_PHP_BIN%
 :RUN
-"%PHPBIN%" "D:\www\Zend2\test\vendor\phpunit\phpunit\phpunit.php" %*
+"%PHPBIN%" "@bin_dir@\phpunit" %*

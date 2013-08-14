@@ -5,85 +5,45 @@ namespace Dashboard\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- *  @ORM\Entity
- *  @ORM\HasLifecycleCallbacks()
- *  @ORM\Table(name="ad_message")
+ * Message
  */
-class Message {
+class Message
+{
     /**
-    * @ORM\Id
-    * @ORM\GeneratedValue(strategy="AUTO")
-    * @ORM\Column(type="integer")
-    */
-    protected $id;
+     * @var integer
+     */
+    private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
-     */
-    protected $user;
-    
-    /** @ORM\Column(type="string")
      * @var string
      */
-    protected $title;
-    
-    /** @ORM\Column(type="text")
-     * @var string
-     */
-    protected $message;
-    
-    /**
-     *  @ORM\Column(type="string", columnDefinition="ENUM('new', 'active', 'suspend', 'close')", nullable=false)
-     *  @var string
-     */
-    protected $status;
-    
-    /**
-     *  @ORM\Column(type="datetime")
-     *  @var DateTime
-     */
-    protected $created;
-    
-    /**
-     *  @ORM\Column(type="datetime")
-     *  @var DateTime
-     */
-    protected $updated;
+    private $title;
 
     /**
-     * @ORM\prePersist
+     * @var string
      */
-    public function setCreatedValue()
-    {
-        $this->created = new \DateTime();
-    }
-    
+    private $message;
+
     /**
-     * @ORM\prePersist
-     * @ORM\preUpdate
+     * @var string
      */
-    public function setUpdatedValue()
-    {
-        $this->created = new \DateTime();
-    }
-    
-    /** Magic getter and setter */
-    public function __get($name)
-    {
-        if(method_exists($this,$MethodName='get' . ucfirst($name))){
-                return $this->$MethodName();
-        } else {
-            return null;
-        }
-    }
-    
-    public function __set($name, $value)
-    {
-        if(method_exists($this,$MethodName='set' . ucfirst($name))){
-                return $this->$MethodName($value);
-        }
-        throw new \Exception('class ' . __CLASS__ . ' has no ' . $MethodName . ' method!');
-    }
+    private $status;
+
+    /**
+     * @var \DateTime
+     */
+    private $created;
+
+    /**
+     * @var \DateTime
+     */
+    private $updated;
+
+    /**
+     * @var \Application\Entity\User
+     */
+    private $user;
+
 
     /**
      * Get id
@@ -213,10 +173,10 @@ class Message {
     /**
      * Set user
      *
-     * @param \Dashboard\Entity\User $user
+     * @param \Application\Entity\User $user
      * @return Message
      */
-    public function setUser(\Dashboard\Entity\User $user = null)
+    public function setUser(\Application\Entity\User $user = null)
     {
         $this->user = $user;
     
@@ -226,10 +186,25 @@ class Message {
     /**
      * Get user
      *
-     * @return \Dashboard\Entity\User 
+     * @return \Application\Entity\User 
      */
     public function getUser()
     {
         return $this->user;
+    }
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedValue()
+    {
+        // Add your code here
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setUpdatedValue()
+    {
+        // Add your code here
     }
 }

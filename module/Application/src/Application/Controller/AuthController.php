@@ -27,7 +27,7 @@ class AuthController extends AbstractActionController
                 $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
                 $result = $auth->authenticate(new UserAuthAdapter($login, $password, $em));
                 if($result->isValid()){
-                    return $this->redirect()->toRoute('home');
+                    return $this->redirect()->toRoute('dashboard');
                 } else {
                     $form->setMessages(array('login' => $result->getMessages()));
                 }
@@ -55,7 +55,7 @@ class AuthController extends AbstractActionController
                 $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
                 $result = $auth->authenticate(new AdminAuthAdapter($login, $password, $em));
                 if($result->isValid()){
-                    return $this->redirect()->toRoute('admin');
+                    return $this->redirect()->toRoute('dashboard');
                 }
             }
         }
@@ -79,9 +79,12 @@ class AuthController extends AbstractActionController
             $confirm = $request->getPost('logout', 'No');    
             if ($confirm == 'Yes') {
                 $auth->clearIdentity();
+                return $this->redirect()->toRoute('userauth');
             }
+ 
+            // Redirect to list of messages
+            return $this->redirect()->toRoute('dashboard/messages');
         }
-        return $this->redirect()->toRoute('home');
  
         return array(
             'user' => $user,
