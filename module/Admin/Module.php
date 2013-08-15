@@ -64,7 +64,6 @@ class Module
                         $mongoDbTable = $mongo->$dbName;
                         return $mongoDbTable;
                     } catch (\MongoConnectionException $e) {
-                        var_dump($e);
                         die('Error connecting to MongoDB server');
                     } catch (\MongoException $e) {
                         die('Error: ' . $e->getMessage());

@@ -12,7 +12,6 @@ class UserController extends AbstractActionController
 {
     public function indexAction()
     {
-        var_dump($this->getServiceLocator()->get('UserInfoTable')); exit;
         $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
         $userRepository = $em->getRepository('Application\Entity\User');
         $list = $userRepository->findAll();
@@ -156,6 +155,43 @@ class UserController extends AbstractActionController
         return array(
             'user' => $user,
         );
+    }
+    
+    public function testAction()
+    {
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $user = $em->find('Application\Entity\User', 1);
+//        $mongo = new \MongoClient();
+//        $mongoDb = $mongo->selectDB('test');
+        $mongoDb = $this->getServiceLocator()->get('UserInfoTable');
+        //$mongoDb->createCollection('other_hlam');
+        $collection = $mongoDb->other_hlam;
+        $dataToTable = array(
+            'numbers' => array( 1, '34', 56),
+            'objects' => array(
+                'xml' => $user->info,
+                ),
+            'arrays' => array(
+                'server' => $_SERVER,
+                'request' => $_REQUEST,
+            ),
+            'datetime' => array(
+                'timeObj' => new \DateTime(),
+                'timestamp' => time(),
+            ),
+            'json' => json_encode(array(
+                'user' => 'avdmit',
+                'role' => 'admin',
+                'created' => new \DateTime(),
+                'unix_timestamp' => time(),
+                )),
+        );
+        var_dump($dataToTable);
+        $cursor = $collection->find();
+        foreach($cursor as $obj){
+            var_dump($obj);
+        }
+        exit;
     }
 
     public function addadminAction()
