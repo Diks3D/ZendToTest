@@ -6,6 +6,7 @@ nbproject
 .idea
 .project
 .settings
+*.sql
 INSTALL.txt
 LICENSE.txt
 README.txt

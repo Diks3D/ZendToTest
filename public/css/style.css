@@ -36,6 +36,13 @@ div.container a.brand {
     padding: 8px 20px 12px 40px;
 }
 
+div.container a.mybrand {
+    background: url("../img/freebsd.png") no-repeat scroll 0 3px transparent;
+    background-size: 35px;
+    margin-left: 0;
+    padding: 8px 20px 12px 40px;
+}
+
 thead {
     background-color: gray;
     color: white;
@@ -80,4 +87,8 @@ tbody.message-tr{
 
 a.logout-btn{
     float: right;
+}
+
+img.user-information {
+    cursor: pointer;
 }

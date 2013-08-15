@@ -8,7 +8,7 @@ class TemporyStorage
 {
     const ROOT_PATH = 'D:/www/Zend2/test';
     protected $_tableGw;
-    public $storagePath = 'upload_storage';
+    public $storagePath = 'storage/upload';
 
     public function __construct(TableGateway $tableGateway) {
         $this->_tableGw = $tableGateway;

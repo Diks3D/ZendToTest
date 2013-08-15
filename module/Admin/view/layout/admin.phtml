@@ -3,7 +3,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <?php echo $this->headTitle('ZF2Test '. $this->translate('My Project'))->setSeparator(' - ')->setAutoEscape(false) ?>
+        <?php echo $this->headTitle('Z2T - Admin Page') ?>
 
         <?php echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0') ?>
 
@@ -28,19 +28,22 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a class="brand" href="<?php echo $this->url('home') ?>"><?php echo $this->translate('Skeleton Application') ?></a>
+                    <a class="brand mybrand" href="<?php echo $this->url('home') ?>"><?php echo $this->translate('My Project') ?></a>
                     <div class="nav-collapse collapse">
                         <ul class="nav">
-                            <li><a href="<?php echo $this->url('home') ?>"><?php echo $this->translate('Home') ?></a></li>
+                            <li class="active"><a href="<?php echo $this->url('home') ?>"><?php echo $this->translate('Statistic') ?></a></li>
                         </ul>
                         <ul class="nav">
-                            <li><a href="<?php echo $this->url('album') ?>"><?php echo $this->translate('Album') ?></a></li>
+                            <li><a href="<?php echo $this->url('admin/adminmanage') ?>"><?php echo $this->translate('Admins') ?></a></li>
                         </ul>
                         <ul class="nav">
-                            <li><a href="<?php echo $this->url('audio') ?>"><?php echo $this->translate('Audio') ?></a></li>
+                            <li><a href="<?php echo $this->url('admin/usermanage') ?>"><?php echo $this->translate('Users') ?></a></li>
                         </ul>
                         <ul class="nav">
-                            <li><a href="<?php echo $this->url('dashboard') ?>"><?php echo $this->translate('DashBoard') ?></a></li>
+                            <li><a href="<?php echo $this->url('logout') ?>"><?php echo $this->translate('Logs') ?></a></li>
+                        </ul>
+                        <ul class="nav">
+                            <li><a href="<?php echo $this->url('logout') ?>"><?php echo $this->translate('MongoDb') ?></a></li>
                         </ul>
                     </div><!--/.nav-collapse -->
                     <?php if(isset($auth)){ ?>
@@ -63,10 +66,3 @@
         <?php echo $this->inlineScript() ?>
     </body>
 </html>
-
-<script>
-    $(document).ready(function(){
-        $('ul.nav li').removeClass('active');
-        $('ul.nav').eq(3).find('li').addClass('active');
-    });
-</script>

@@ -1,6 +1,7 @@
 <?php
 namespace Admin;
 
+use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceManager,
     Zend\Db\ResultSet\ResultSet,
     Zend\Db\TableGateway\TableGateway;
@@ -12,7 +13,7 @@ class Module
 
     public function init(\Zend\ModuleManager\ModuleManager $mm)
     {
-        $mm->getEventManager()->getSharedManager()->attach(__NAMESPACE__, 'dispatch', function($e) {
+        $mm->getEventManager()->getSharedManager()->attach(__NAMESPACE__, 'dispatch', function(\Zend\Mvc\MvcEvent $e) {
                 $e->getTarget()->layout('admin/layout');
             });
     }

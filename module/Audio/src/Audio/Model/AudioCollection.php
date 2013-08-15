@@ -7,7 +7,7 @@ class AudioCollection
 {
     const ROOT_PATH = 'D:/www/Zend2/test';
 
-    protected $_storagePath = 'audio_storage';
+    protected $_storagePath = 'storage/audio';
     protected $_tableGw;
 
     public function __construct(TableGateway $tableGateway)

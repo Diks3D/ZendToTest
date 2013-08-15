@@ -41,10 +41,15 @@ class UserController extends AbstractActionController
                 $user->passHash = md5($formData['password']);
                 $user->fullName = $formData['fullname'];
                 $em->persist($user);
+                try{
                 $em->flush();
+                } catch(\Doctrine\DBAL\DBALException $e){
+                    $form->setMessages(array('login' => array('User with this login or email is exists')));
+                    return array('form' => $form);
+                }
 
                 // Redirect to list of albums
-                return $this->redirect()->toRoute('dashboard/user');
+                return $this->redirect()->toRoute('admin/usermanage');
             }
         }
         return array('form' => $form);
