@@ -1,0 +1,37 @@
+<?php
+$title = 'Login to Zend To Test';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+<?php
+$form = $this->form;
+$form->setAttribute('action', $this->url('userauth'));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+?> <div class="zend-form-right"> <?php
+echo $this->formLabel($form->get('login'));
+echo $this->formText($form->get('login'));
+echo $this->formLabel($form->get('password'));
+echo $this->formPassword($form->get('password'));
+?> </div> <?php
+    echo $this->formSubmit($form->get('submit'));
+    echo $this->formReset($form->get('reset'));
+    echo $this->form()->closeTag();
+
+    $messages = $form->getMessages();
+    if ($messages) {
+    ?>
+    <div class="error-panel">
+        <?php
+        foreach ($messages as $errors) {
+            foreach ($errors as $error) {
+                ?>
+                <p class="text-error"><?= $error ?><p/>
+                <?php
+            }
+        }
+        ?>
+    </div>
+    <?php
+}

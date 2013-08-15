@@ -1,0 +1,19 @@
+<?php
+$title = 'Clear uploaded storage';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+ 
+<p>This action remove all uploaded files from upload storage!
+</p>
+<?php
+$url = $this->url('storage', array(
+    'action' => 'clear'
+));
+?>
+<form action="<?php echo $url; ?>" method="post">
+<div>
+    <input class="btn btn-danger" type="submit" name="delete" value="Yes" />
+    <input class="btn" type="submit" name="delete" value="No" />
+</div>
+</form>

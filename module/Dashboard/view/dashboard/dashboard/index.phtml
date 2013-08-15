@@ -1,0 +1,53 @@
+<?php
+$title = 'DashBoard';
+$this->headTitle($title);
+$role = $this->layout()->role;
+?>
+<h1><?php echo $this->escapeHtml('Messages list'); ?></h1>
+<p>
+    <a class="btn" href="<?php echo $this->url('dashboard/messages', array('action' => 'add')); ?>">Add new message</a>
+    <?php if ($role == 'admin') { ?>
+        <a class="btn" href="<?php echo $this->url('dashboard/user', array('action' => 'index')); ?>">User managment</a>
+        <a class="btn btn-danger" href="<?php echo $this->url('dashboard', array('action' => 'clear')); ?>">Clear DashBoard</a>
+    <?php } ?>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr><th rowspan="2">ID</th>
+            <th colspan="2">Message Title</th>
+            <th>from User</th>
+            <th rowspan="2" class="manage-th">Managment</th>
+        </tr><tr>
+            <th>Message Body</th>
+            <th class="adminname-th">Admin / Status</th>
+            <th class="datetime-th">Created / Updated</th>
+        </tr>
+    </thead>
+    <?php
+    if (isset($messages)) :
+        foreach ($messages as $message) :
+            ?>
+            <tbody class="message-tr">
+                <tr>
+                    <td rowspan="3"><?php echo $message->id; ?></td>
+                    <td colspan="2"><?php echo $this->escapeHtml($message->title); ?></td>
+                    <td><?php echo $this->escapeHtml('Unknow User'); ?></td>
+                    <td rowspan="3"><a class="btn btn-small btn-warning manage-btn" href="<?php echo $this->url('dashboard/messages', array('action' => 'changestatus', 'id' => $message->id)); ?>">Change Status</a><br />
+                        <a class="btn btn-small btn-info manage-btn" href="<?php echo $this->url('dashboard/messages', array('action' => 'edit', 'id' => $message->id)); ?>">Edit Message</a><br />
+                        <a class="btn btn-small btn-danger manage-btn" href="<?php echo $this->url('dashboard/messages', array('action' => 'delete', 'id' => $message->id)); ?>">Delete Message</a>
+                    </td>
+                </tr><tr>
+                    <td rowspan="2"><?php echo $this->escapeHtml($message->message); ?></td>
+                    <td><?php echo $this->escapeHtml($message->user->login); ?></td>
+                    <td><?php echo $message->created->format('H:i d-M-Y'); ?></td>
+                </tr><tr>
+                    <td><?php echo $this->escapeHtml($message->user->login); ?></td>
+                    <td><?php echo $message->updated->format('H:i d-M-Y'); ?></td>   
+                </tr>
+            </tbody>
+            <?php
+        endforeach;
+    endif;
+    ?>
+</table>

@@ -1,0 +1,101 @@
+<?php
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ *  @ORM\Entity
+ *  @ORM\Table(name="z2t_user")
+ *  @ORM\HasLifecycleCallbacks()
+ */
+class User
+{
+    /**
+     * @ORM\Id
+     * @ORM\OneToMany(targetEntity="Message", cascade={"ALL"})
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
+    
+    /**
+     * @ORM\Column(type="string", unique=true, length=100)
+     */
+    protected $login;
+    
+    /**
+     * @ORM\Column(type="string", unique=true, length=150)
+     */
+    protected $email;
+    
+    /** 
+     * @ORM\Column(name="pass_hash", type="string", length=40)
+     */
+    protected $passHash;
+    
+    /** 
+     * @ORM\Column(name="full_name", type="string")
+     */
+    protected $fullName;
+    
+    /** @ORM\Column(name="info_xml", type="text")
+     * @var string
+     */
+    protected $info;
+
+   /**
+     *  @ORM\Column(type="datetime")
+     *  @var \DateTime
+     */
+    protected $created;
+    
+    /**
+     *  @ORM\Column(name="last_login", type="datetime")
+     *  @var \DateTime
+     */
+    protected $lastLogin;
+
+    /**
+     * @ORM\prePersist
+     */
+    public function setCreatedValue()
+    {
+        $this->created = new \DateTime();
+    }
+    
+    /**
+     * @ORM\prePersist
+     * @ORM\preUpdate
+     */
+    public function setLastLoginValue()
+    {
+        $this->lastLogin = new \DateTime();
+    }
+    
+    /**
+     * @ORM\prePersist
+     */
+    public function setInfoValue()
+    {
+        $simpleXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><info></info>');
+        $this->info = $simpleXml->asXML();
+    }
+    
+    /** Magic getter and setter */
+    public function __get($name)
+    {
+        if(method_exists($this,$MethodName='get' . ucfirst($name))){
+                return $this->$MethodName();
+        } else {
+            return null;
+        }
+    }
+    
+    public function __set($name, $value)
+    {
+        if(method_exists($this,$MethodName='set' . ucfirst($name))){
+                return $this->$MethodName($value);
+        }
+        throw new \Exception('class ' . __CLASS__ . ' has no ' . $MethodName . ' method!');
+    }
+}

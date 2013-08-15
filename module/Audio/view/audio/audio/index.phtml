@@ -1,0 +1,44 @@
+<?php
+$this->headTitle('My Audio Collection');
+?>
+<h1><?php echo $this->escapeHtml('See my collection'); ?></h1>
+<p>
+    <a class="btn" href="<?php echo $this->url('storage', array('action' => 'upload')); ?>">Upload new audio tracks</a>
+    <a class="btn" href="<?php echo $this->url('storage', array('action' => 'index')); ?>">Add uploaded audio to collection</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Filename</th>
+            <th>ID3v1</th>
+            <th>ID3v2</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($list as $audioEntry) :
+            $id3tags = simplexml_load_string($audioEntry->tags);
+            ?>
+            <tr>
+                <td><?php echo $this->escapeHtml($audioEntry->title); ?></td>
+                <td><?php echo $this->escapeHtml($audioEntry->artist); ?></td>
+                <td><?php echo $this->escapeHtml($audioEntry->filename); ?></td>
+                <td><i class="icon-tag<?php echo (isset($id3tags['id3v1'])) ? '' : ' icon-white'; ?>"></i> </td>
+                <td><i class="icon-tag<?php echo (isset($id3tags['id3v1'])) ? '' : ' icon-white'; ?>"></i> </td>
+                <td><?php echo date_create_from_format('Y-m-d?H:i:s', $audioEntry->created)->format('h:i d-m-Y'); ?></td>
+                <td><?php echo date_create_from_format('Y-m-d?H:i:s', $audioEntry->updated)->format('h:i d-m-Y'); ?></td>
+                <td>
+                    <a class="btn btn-small btn-info" href="<?php echo $this->url('audio', array('action' => 'edit', 'id' => $audioEntry->id));
+            ?>">Edit</a>
+                    <a class="btn btn-small btn-danger" href="<?php echo $this->url('audio', array('action' => 'delete', 'id' => $audioEntry->id));
+            ?>">Delete</a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

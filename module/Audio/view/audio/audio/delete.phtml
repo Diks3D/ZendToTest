@@ -1,0 +1,22 @@
+<?php
+
+$this->headTitle('Delete audio track');
+?>
+<h1><?php echo $this->escapeHtml('Delete audio track from Collection'); ?></h1>
+ 
+<p>Are you sure that you want to delete audio track from collection 
+    '<?php echo $this->escapeHtml($entry->filename); ?>' ?
+</p>
+<?php
+$url = $this->url('audio', array(
+    'action' => 'delete',
+    'id'     => $this->id,
+));
+?>
+<form action="<?php echo $url; ?>" method="post">
+<div>
+    <input type="hidden" name="id" value="<?php echo (int) $entry->id; ?>" />
+    <input type="submit" name="delete" value="Yes" />
+    <input type="submit" name="delete" value="No" />
+</div>
+</form>

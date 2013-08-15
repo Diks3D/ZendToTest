@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<phpunit bootstrap="Bootstrap.php">
+    <testsuites>
+        <testsuite name="AlbumModule">
+            <directory>./module/Album</directory>
+        </testsuite>
+        <testsuite name="AlbumModule">
+            <directory>./module/Audio</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

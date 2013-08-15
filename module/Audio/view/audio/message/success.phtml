@@ -1,0 +1,12 @@
+<?php
+
+$title = 'Action success';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+
+<?php if(isset($message)){ ?>
+    <br/><br/><h4><?= $message ?></h4>
+<?php } ?>
+ 
+

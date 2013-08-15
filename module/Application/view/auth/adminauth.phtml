@@ -1,0 +1,19 @@
+<?php
+$title = 'Admin Login to Dashboard';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+<?php
+$form = $this->form;
+$form->setAttribute('action', $this->url('adminauth'));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+echo $this->formLabel($form->get('login'));
+echo $this->formText($form->get('login'));
+echo $this->formLabel($form->get('password'));
+echo $this->formPassword($form->get('password'));
+echo '<br/>';
+echo $this->formSubmit($form->get('submit'));
+echo $this->formReset($form->get('reset'));
+echo $this->form()->closeTag();

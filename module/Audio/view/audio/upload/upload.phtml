@@ -1,0 +1,23 @@
+<?php
+
+$title = 'Upload audio files';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+
+<?php
+$form->prepare();
+echo $this->form()->openTag($form);
+?>
+
+<div class="form-element">
+    <?php $fileElement = $form->get('files'); ?>
+    <?php echo $this->formLabel($fileElement); ?>
+    <?php echo $this->formFile($fileElement); ?>
+</div>
+
+<?php
+echo $this->formSubmit($form->get('submit'));
+echo $this->formReset($form->get('reset'));
+echo $this->form()->closeTag();
+?>
