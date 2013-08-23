@@ -117,8 +117,8 @@ class UserForm extends Form
                             'name' => 'StringLength',
                             'options' => array(
                                 'encoding' => 'UTF-8',
-                                'min' => 1,
-                                'max' => 100,
+                                'min' => 4,
+                                'max' => 50,
                             ),
                         ),
                         array('name' => 'Alnum'),
@@ -134,6 +134,11 @@ class UserForm extends Form
                     'validators' => array(
                         array(
                             'name' => 'EmailAddress',
+                            'options' => array(
+                                'encoding' => 'UTF-8',
+                                'min' => 3,
+                                'max' => 100,
+                            ),
                         ),
                     ),
                 )));
