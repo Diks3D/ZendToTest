@@ -1,0 +1,30 @@
+<?
+$form = $this->form;
+$form->setAttribute('action', $this->url);
+$form->prepare();
+$this->formElementErrors()->setMessageOpenFormat('<span class="label label-danger">');
+$this->formElementErrors()->setMessageCloseString('</span>');
+$this->formElementErrors()->setMessageSeparatorString('</span><span class="label label-danger">');
+
+echo $this->form()->openTag($form);
+foreach ($form as $element) :?>
+<?
+    if ($element === $form->get('submit')) continue;
+?>
+<div class="form-group <?php if($this->formElementErrors($element)) 
+                                echo "has-error" ?>">
+    <label class="control-label"><?php echo $element->getLabel() ?></label>
+    <? $element->setAttribute('class', 'form-control');?>
+    <?php echo $this->formElement($element);
+    if($this->formElementErrors($element)) ?>
+    <?php echo $this->formElementErrors($element) ?>
+</div>
+<?php
+endforeach;
+$form->get('submit')->setAttribute('class', 'btn btn-sm btn-primary');
+?>
+<div class="form-group">
+<?= $this->formSubmit($form->get('submit'));?>
+</div>
+<?
+echo $this->form()->closeTag();

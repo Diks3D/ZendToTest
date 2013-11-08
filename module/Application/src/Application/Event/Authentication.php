@@ -36,11 +36,10 @@ class Authentication
      */
     protected $_authService = null;
     
-    public function __construct(\Zend\Authentication\AuthenticationService $authService , $acl)
+    public function __construct(\Zend\Authentication\AuthenticationService $authService , $aclAdapter = null)
     {
         $this->_authService = $authService;
-        $this->_acl = $acl;
-        //var_dump($aclAdapter);
+        $this->_acl = $aclAdapter;
     }
 
     /**
@@ -51,8 +50,15 @@ class Authentication
      */
     public function preDispatch(MvcEvent $event)
     {
-        $routeMatch = $event->getRouteMatch()->getParams();
-       
+        $routeParams = $event->getRouteMatch()->getParams();
+        $controllerNameArray = explode('\\', $routeParams['controller']);
+        $routeParams['namespace'] = $controllerNameArray[0];
+        $routeParams['url'] = $event->getRequest()->getUri()->getPath();
+        $routeParams['https'] = ($event->getRequest()->getUri()->getScheme() === 'https') ? true : false;
+        
+        var_dump(__NAMESPACE__);
+        var_dump($routeParams); exit;
+        
         if (!$this->_authService->hasIdentity()) {
             if($routeMatch['controller'] !== 'Application\Controller\Auth'){
                 $event->setRouteMatch(new RouteMatch(array(
@@ -69,10 +75,10 @@ class Authentication
             $role = 'admin';
         }
         
-//        if (!$this->_acl->isAllowed($role, $routeMatch['controller'], $routeMatch['action'])) {
-//            var_dump('Ваших прав недостаточно!');
-//            exit;
-//        }
+        if (!$this->_acl->isAllowed($role, $routeMatch['controller'], $routeMatch['action'])) {
+            var_dump('Ваших прав недостаточно!');
+            exit;
+        }
         
         $event->getViewModel()->setVariable('auth', $user);
         $event->getViewModel()->setVariable('role', $role);

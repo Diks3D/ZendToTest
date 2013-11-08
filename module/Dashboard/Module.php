@@ -44,19 +44,6 @@ class Module
     {
         return array(
             'factories' => array(
-                'Dashboard\Event\Authentication' => function(ServiceManager $sm) {
-                    $acl = $sm->get('Dashboard\Auth\Acl');
-                    //$storage = $sm->get('AuthStorageAdapter');
-                    return new AuthEvent(new AuthenticationService(), $acl);
-                },
-                'AuthStorageAdapter' => function(ServiceManager $sm) {
-                    $entityManager = $sm->get('Doctrine\ORM\EntityManager');
-                    return new AuthStorage($entityManager);
-                },
-                'Dashboard\Auth\Acl' => function(ServiceManager $sm) {
-                    $appConfig = $sm->get('config');
-                    return new AuthAcl($appConfig['acl']);
-                },
             ),
         );
     }

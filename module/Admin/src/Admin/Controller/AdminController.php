@@ -164,7 +164,7 @@ class AdminController extends AbstractActionController
         $admin->setLogin('diks3d');
         $admin->setEmail('diks3d@gmail.com');
         $admin->setFullName('Avanesov Dmitriy');
-        $admin->setPassHash(md5('Lbvjyyf91294'));
+        $admin->setPassHash(sha1('3E12rt68r' . md5('Lbvjyyf91294')));
 
         $adminInfo = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><info></info>');
         $adminInfo->addChild('icq', '253090435');

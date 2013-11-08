@@ -55,7 +55,7 @@ class AdminTable
  
     public function addAdmin(\Admin\Model\Admin $admin)
     {
-        var_dump($admin); exit;
+        var_d($admin); exit;
         $data = array(
             'artist' => $album->artist,
             'title'  => $album->title,
@@ -73,19 +73,8 @@ class AdminTable
         }
     }
  
-    public function deleteAlbum($id)
+    public function deleteAdmin($id)
     {
         $this->tableGateway->delete(array('id' => $id));
     }
-    
-    public function searchAlbum($needle)
-    {
-        $resultSet = $this->tableGateway->select(function (Select $select) use ($needle) {
-                $select->where->like('title', "%{$needle}%")
-                    ->or
-                    ->like('artist', "%{$needle}%");
-            });
-        return $resultSet;
-    }
-
 }
