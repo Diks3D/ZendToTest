@@ -6,12 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  *  @ORM\Entity
  *  @ORM\Table(name="z2t_admin")
+ *  @ORM\HasLifecycleCallbacks
  */
 class Admin
 {
     /**
      * @ORM\Id
-     * @ORM\OneToMany(targetEntity="Dashboard\Entity\Message", cascade={"ALL"})
+     * @ORM\OneToMany(targetEntity="Dashboard\Entity\Message", cascade={"persist", "remove", "merge"})
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
@@ -28,7 +29,7 @@ class Admin
     protected $email;
     
     /** 
-     * @ORM\Column(name="pass_hash", type="string", length=32)
+     * @ORM\Column(name="pass_hash", type="string", length=40)
      */
     protected $passHash;
     
@@ -38,14 +39,12 @@ class Admin
     protected $fullName;
     
     /**
-     *  @ORM\Column(type="datetime")
-     *  @var \DateTime
+     * @ORM\Column(name="create_at", type="datetime")
      */
     protected $created;
     
     /**
-     *  @ORM\Column(name="last_login", type="datetime")
-     *  @var \DateTime
+     * @ORM\Column(name="last_login", type="datetime")
      */
     protected $lastLogin;
 

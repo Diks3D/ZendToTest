@@ -1,0 +1,26 @@
+.PaymentTable table,
+.PaymentTable tr,
+.PaymentTable td {
+    border: 0px none transparent;
+    border-collapse: collapse;
+}
+
+.PaymentTable{
+    max-width: 620px;
+    padding: 10px;
+    margin: 30px auto;
+    border: 2px solid #08c;
+    border-radius: 10px;
+}
+
+.PaymentTable td{
+    width: 300px;
+    height: 200px;
+    text-align: center;
+}
+
+.PaymentTable img{
+    width: 200px;
+    height: 150px;
+    vertical-align: central;
+}

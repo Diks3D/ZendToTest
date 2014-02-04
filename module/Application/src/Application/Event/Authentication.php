@@ -56,11 +56,11 @@ class Authentication
         $routeParams['url'] = $event->getRequest()->getUri()->getPath();
         $routeParams['https'] = ($event->getRequest()->getUri()->getScheme() === 'https') ? true : false;
         
-        var_dump(__NAMESPACE__);
-        var_dump($routeParams); exit;
+        //var_dump(__NAMESPACE__);
+        //var_dump($routeParams); exit;
         
         if (!$this->_authService->hasIdentity()) {
-            if($routeMatch['controller'] !== 'Application\Controller\Auth'){
+            if($routeParams['controller'] !== 'Application\Controller\Auth'){
                 $event->setRouteMatch(new RouteMatch(array(
                     'controller' => 'Application\Controller\Auth',
                     'action'=> 'auth',
@@ -75,7 +75,7 @@ class Authentication
             $role = 'admin';
         }
         
-        if (!$this->_acl->isAllowed($role, $routeMatch['controller'], $routeMatch['action'])) {
+        if (!$this->_acl->isAllowed($role, $routeParams['controller'], $routeParams['action'])) {
             var_dump('Ваших прав недостаточно!');
             exit;
         }

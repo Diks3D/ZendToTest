@@ -1,0 +1,4 @@
+name: Doctrine Sandbox Migrations
+migrations_namespace: DoctrineMigrations
+table_name: migration
+migrations_directory: ./data/DoctrineORMModule/Migrations

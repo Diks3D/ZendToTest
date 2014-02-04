@@ -2,49 +2,53 @@
 
 namespace Dashboard\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping as ORM,
+    Doctrine\ORM\ORMInvalidArgumentException as InvalidArgumentException;
 
 /**
- * Message
+ *  @ORM\Entity
+ *  @ORM\Table(name="z2t_dashboard_messages")
+ *  @ORM\HasLifecycleCallbacks
  */
 class Message
 {
+    const STATUS_OPEN = 'open';
+    const STATUS_SUSPEND = 'suspend';
+    const STATUS_IN_PROGRESS= 'in_progress';
+    const STATUS_CLOSED = 'closed';
+    
     /**
-     * @var integer
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
-     * @var string
+     * @ORM\Column(type="string", length=255)
      */
     private $title;
 
     /**
-     * @var string
+     * @ORM\Column(type="text")
      */
     private $message;
 
     /**
-     * @var string
+     * @ORM\Column(type="smallint")
      */
-    private $status;
+    private $status = 'open';
 
     /**
-     * @var \DateTime
+     * @ORM\Column(name="create_at", type="datetime")
      */
     private $created;
 
     /**
-     * @var \DateTime
+     * @ORM\Column(name="update_at", type="datetime")
      */
     private $updated;
-
-    /**
-     * @var \Application\Entity\User
-     */
-    private $user;
-
-
+    
     /**
      * Get id
      *
@@ -104,20 +108,24 @@ class Message
     /**
      * Set status
      *
-     * @param string $status
+     * @param integer $status
      * @return Message
      */
     public function setStatus($status)
     {
+        $validStatuses = array(self::STATUS_OPEN, self::STATUS_SUSPEND, self::STATUS_IN_PROGRESS, self::STATUS_CLOSED);
+        if (!in_array($status, $validStatuses)) {
+            throw new InvalidArgumentException("Invalid status");
+        }
         $this->status = $status;
-    
+        
         return $this;
     }
 
     /**
      * Get status
      *
-     * @return string 
+     * @return integer 
      */
     public function getStatus()
     {
@@ -168,43 +176,5 @@ class Message
     public function getUpdated()
     {
         return $this->updated;
-    }
-
-    /**
-     * Set user
-     *
-     * @param \Application\Entity\User $user
-     * @return Message
-     */
-    public function setUser(\Application\Entity\User $user = null)
-    {
-        $this->user = $user;
-    
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return \Application\Entity\User 
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-    /**
-     * @ORM\PrePersist
-     */
-    public function setCreatedValue()
-    {
-        // Add your code here
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function setUpdatedValue()
-    {
-        // Add your code here
     }
 }

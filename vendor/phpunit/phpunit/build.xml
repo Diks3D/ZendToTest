@@ -4,25 +4,10 @@
  <property name="php" value="php"/>
 
  <target name="build"
-   depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpunit,phpcb"/>
-
- <target name="build-parallel"
-   depends="prepare,lint,tools-parallel,phpunit,phpcb"/>
-
- <target name="tools-parallel"
-         description="Run tools in parallel">
-  <parallel threadCount="2">
-   <sequential>
-    <antcall target="pdepend"/>
-    <antcall target="phpmd-ci"/>
-   </sequential>
-   <antcall target="phpcpd"/>
-   <antcall target="phpcs-ci"/>
-   <antcall target="phploc"/>
-  </parallel>
- </target>
+   depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpunit,phpdox"/>
 
  <target name="clean" description="Cleanup build artifacts">
+  <delete dir="${basedir}/bin"/>
   <delete dir="${basedir}/vendor"/>
   <delete file="${basedir}/composer.lock"/>
   <delete file="${basedir}/composer.phar"/>
@@ -82,6 +67,8 @@
   <exec executable="phploc">
    <arg value="--log-csv" />
    <arg value="${basedir}/build/logs/phploc.csv" />
+   <arg value="--log-xml" />
+   <arg value="${basedir}/build/logs/phploc.xml" />
    <arg path="${basedir}/PHPUnit" />
   </exec>
  </target>
@@ -154,27 +141,18 @@
   </exec>
  </target>
 
- <target name="phpcb"
-         description="Aggregate tool output with PHP_CodeBrowser">
-  <exec executable="phpcb">
-   <arg value="--log" />
-   <arg path="${basedir}/build/logs" />
-   <arg value="--source" />
-   <arg path="${basedir}/PHPUnit" />
-   <arg value="--output" />
-   <arg path="${basedir}/build/code-browser" />
-  </exec>
+ <target name="phpdox"
+         description="Generate software project documentation using phpDox">
+  <exec executable="phpdox" />
  </target>
 
  <target name="phar"
          description="Create PHAR archive of PHPUnit and all its dependencies"
-         depends="clean">
-  <mkdir dir="${basedir}/build/phar"/>
+         depends="phar-prepare,phar-build">
+ </target>
 
-  <exec executable="bash" outputproperty="version">
-   <arg value="-c" />
-   <arg value="${basedir}/phpunit.php --version | awk 'BEGIN { ORS = &quot;&quot;; } {print $2}'" />
-  </exec>
+ <target name="phar-prepare" depends="clean">
+  <mkdir dir="${basedir}/build/phar"/>
 
   <get src="https://getcomposer.org/composer.phar" dest="${basedir}/composer.phar"/>
 
@@ -207,13 +185,6 @@
   </exec>
 
   <move file="${basedir}/composer.json.bak" tofile="${basedir}/composer.json"/>
-
-  <copy todir="${basedir}/build/phar/phpunit">
-   <fileset dir="${basedir}/PHPUnit">
-    <include name="**/*.php" />
-    <exclude name="**/Autoload.*" />
-   </fileset>
-  </copy>
 
   <copy todir="${basedir}/build/phar/php-code-coverage">
    <fileset dir="${basedir}/vendor/phpunit/php-code-coverage/PHP">
@@ -290,6 +261,21 @@
     <exclude name="**/Autoload.*" />
    </fileset>
   </copy>
+ </target>
+
+ <target name="phar-build">
+  <exec executable="bash" outputproperty="version">
+   <arg value="-c" />
+   <arg value="${basedir}/phpunit.php --version | awk 'BEGIN { ORS = &quot;&quot;; } {print $2}'" />
+  </exec>
+
+  <copy todir="${basedir}/build/phar/phpunit">
+   <fileset dir="${basedir}/PHPUnit">
+    <include name="**/*.php" />
+    <include name="**/*.tpl*" />
+    <exclude name="**/Autoload.*" />
+   </fileset>
+  </copy>
 
   <exec executable="phpab">
    <arg value="--all" />
@@ -304,11 +290,5 @@
   </exec>
 
   <chmod file="${basedir}/build/phpunit-${version}.phar" perm="ugo+rx"/>
-
-  <delete dir="${basedir}/build/phar"/>
-  <delete dir="${basedir}/bin"/>
-  <delete dir="${basedir}/vendor"/>
-  <delete file="${basedir}/composer.lock"/>
-  <delete file="${basedir}/composer.phar"/>
  </target>
 </project>

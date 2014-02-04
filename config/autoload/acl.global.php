@@ -19,7 +19,16 @@ return array(
                 ),
                 'Dashboard\Controller\User' => array(
                     'all' => 'admin',
-                )
+                ),
+                'Application\Controller\Index' => array(
+                    'all' => 'guest'
+                ),
+                'Money\Controller\Index' => array(
+                    'all' => 'guest'
+                ),
+                'Money\Controller\YandexMoney' => array(
+                    'all' => 'user'
+                ),
             )
         )
     )

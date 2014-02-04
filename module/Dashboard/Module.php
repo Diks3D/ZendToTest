@@ -1,25 +1,17 @@
 <?php
 namespace Dashboard;
 
-use Zend\Mvc\MvcEvent,
-    Zend\ModuleManager\ModuleManager,
-    Zend\ServiceManager\ServiceManager,
-    Zend\Authentication\AuthenticationService;
-use Dashboard\Listener\AuthListener,
-    Dashboard\Event\Authentication as AuthEvent,
-    Dashboard\Model\Entry\Auth as AuthEntry,
-    Dashboard\Auth\Acl as AuthAcl,
-    Dashboard\Model\Auth\Storage as AuthStorage;
+use Zend\ModuleManager\ModuleManager;
 
 class Module
 {
 
-//    public function init(ModuleManager $mm)
-//    {
-//        $mm->getEventManager()->getSharedManager()->attach(__NAMESPACE__, 'dispatch', function($e) {
-//                $e->getTarget()->layout('dashboard/layout');
-//            });
-//    }
+    public function init(ModuleManager $mm)
+    {
+        $mm->getEventManager()->getSharedManager()->attach(__NAMESPACE__, 'dispatch', function($e) {
+                $e->getTarget()->layout('dashboard/layout');
+            });
+    }
 
     public function getAutoloaderConfig()
     {

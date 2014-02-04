@@ -10,6 +10,7 @@ return array(
         'Audio',
         'Dashboard',
         'Album',
+        'Money',
     ),
 
     // These are various options for the listeners attached to the ModuleManager

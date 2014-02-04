@@ -24,51 +24,64 @@ use Doctrine\MongoDB\Util\ReadPreference;
 /**
  * Wrapper for the PHP MongoCursor class.
  *
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- * @link        www.doctrine-project.org
- * @since       1.0
- * @author      Jonathan H. Wage <jonwage@gmail.com>
+ * @since  1.0
+ * @author Jonathan H. Wage <jonwage@gmail.com>
  */
 class Cursor implements Iterator
 {
-    /** The Doctrine Connection */
-    protected $connection;
-
-    /** The Doctrine Collection */
+    /**
+     * The Collection instance used for recreating this cursor.
+     *
+     * This is also used to access the Connection for reinitializing during
+     * retry attempts.
+     *
+     * @var Collection
+     */
     protected $collection;
 
-    /** The PHP MongoCursor being wrapped */
+    /**
+     * The MongoCursor instance being wrapped.
+     *
+     * @var \MongoCursor
+     */
     protected $mongoCursor;
 
-    /** Number of times to try operations on the cursor */
+    /**
+     * Number of times to retry queries.
+     *
+     * @var integer
+     */
     protected $numRetries;
+
     protected $query = array();
     protected $fields = array();
-    protected $hints = array();
+    protected $hint;
     protected $immortal;
     protected $options = array();
     protected $batchSize;
     protected $limit;
+    protected $readPreference;
+    protected $readPreferenceTags;
     protected $skip;
     protected $slaveOkay;
     protected $snapshot;
-    protected $sorts = array();
+    protected $sort;
     protected $tailable;
     protected $timeout;
 
     /**
-     * Create a new MongoCursor which wraps around a given PHP MongoCursor.
+     * Constructor.
      *
-     * @param Connection $connection The Doctrine Connection instance.
-     * @param Collection $collection The Doctrine Collection that created this cursor.
-     * @param MongoCursor $mongoCursor The cursor being wrapped.
-     * @param array $query Query object for this cursor.
-     * @param array $fields Fields to select for this cursor.
-     * @param boolean|integer $numRetries Number of times to retry queries.
+     * The wrapped MongoCursor instance may change if the cursor is recreated.
+     *
+     * @param Collection   $collection  Collection used to create this Cursor
+     * @param \MongoCursor $mongoCursor MongoCursor instance being wrapped
+     * @param array        $query       Query criteria
+     * @param array        $fields      Selected fields (projection)
+     * @param integer      $numRetries  Number of times to retry queries
      */
-    public function __construct(Connection $connection, Collection $collection, \MongoCursor $mongoCursor, array $query = array(), array $fields = array(), $numRetries = 0)
+    public function __construct(Collection $collection, \MongoCursor $mongoCursor, array $query = array(), array $fields = array(), $numRetries = 0)
     {
-        $this->connection = $connection;
         $this->collection = $collection;
         $this->mongoCursor = $mongoCursor;
         $this->query = $query;
@@ -76,31 +89,335 @@ class Cursor implements Iterator
         $this->numRetries = (integer) $numRetries;
     }
 
-    public function getConnection()
+    /**
+     * Wrapper method for MongoCursor::addOption().
+     *
+     * @see http://php.net/manual/en/mongocursor.addoption.php
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function addOption($key, $value)
     {
-        return $this->connection;
+        $this->options[$key] = $value;
+        $this->mongoCursor->addOption($key, $value);
+        return $this;
     }
 
+    /**
+     * Wrapper method for MongoCursor::batchSize().
+     *
+     * @see http://php.net/manual/en/mongocursor.batchsize.php
+     * @param integer $num
+     * @return self
+     */
+    public function batchSize($num)
+    {
+        $num = (integer) $num;
+        $this->batchSize = $num;
+        $this->mongoCursor->batchSize($num);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::count().
+     *
+     * @see http://php.net/manual/en/countable.count.php
+     * @see http://php.net/manual/en/mongocursor.count.php
+     * @param boolean $foundOnly
+     * @return integer
+     */
+    public function count($foundOnly = false)
+    {
+        $cursor = $this;
+        return $this->retry(function() use ($cursor, $foundOnly) {
+            return $cursor->getMongoCursor()->count($foundOnly);
+        }, true);
+    }
+
+    /**
+     * Wrapper method for MongoCursor::current().
+     *
+     * @see http://php.net/manual/en/iterator.current.php
+     * @see http://php.net/manual/en/mongocursor.current.php
+     * @return array|null
+     */
+    public function current()
+    {
+        $current = $this->mongoCursor->current();
+        if ($current instanceof \MongoGridFSFile) {
+            $document = $current->file;
+            $document['file'] = new GridFSFile($current);
+            $current = $document;
+        }
+        return $current;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::dead().
+     *
+     * @see http://php.net/manual/en/mongocursor.dead.php
+     * @return boolean
+     */
+    public function dead()
+    {
+        return $this->mongoCursor->dead();
+    }
+
+    /**
+     * Wrapper method for MongoCursor::explain().
+     *
+     * @see http://php.net/manual/en/mongocursor.explain.php
+     * @return array
+     */
+    public function explain()
+    {
+        $cursor = $this;
+        return $this->retry(function() use ($cursor) {
+            return $cursor->getMongoCursor()->explain();
+        }, true);
+    }
+
+    /**
+     * Wrapper method for MongoCursor::fields().
+     *
+     * @see http://php.net/manual/en/mongocursor.fields.php
+     * @return self
+     */
+    public function fields(array $f)
+    {
+        $this->fields = $f;
+        $this->mongoCursor->fields($f);
+        return $this;
+    }
+
+    /**
+     * Return the collection for this cursor.
+     *
+     * @return Collection
+     */
     public function getCollection()
     {
         return $this->collection;
     }
 
-    public function getQuery()
+    /**
+     * Return the connection for this cursor.
+     *
+     * @deprecated 1.1 Will be removed for 2.0
+     * @return Connection
+     */
+    public function getConnection()
     {
-        return $this->query;
+        return $this->collection->getDatabase()->getConnection();
     }
 
+    /**
+     * Return the selected fields (projection).
+     *
+     * @return array
+     */
     public function getFields()
     {
         return $this->fields;
     }
 
+    /**
+     * Returns the MongoCursor instance being wrapped.
+     *
+     * @return \MongoCursor
+     */
+    public function getMongoCursor()
+    {
+        return $this->mongoCursor;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::getNext().
+     *
+     * @see http://php.net/manual/en/mongocursor.getnext.php
+     * @return array|null
+     */
+    public function getNext()
+    {
+        $cursor = $this;
+        $next = $this->retry(function() use ($cursor) {
+            return $cursor->getMongoCursor()->getNext();
+        }, false);
+        if ($next instanceof \MongoGridFSFile) {
+            $document = $next->file;
+            $document['file'] = new GridFSFile($next);
+            $next = $document;
+        }
+        return $next;
+    }
+
+    /**
+     * Return the query criteria.
+     *
+     * @return array
+     */
+    public function getQuery()
+    {
+        return $this->query;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::getReadPreference().
+     *
+     * @see http://php.net/manual/en/mongocursor.getreadpreference.php
+     * @return array
+     */
+    public function getReadPreference()
+    {
+        return $this->mongoCursor->getReadPreference();
+    }
+
+    /**
+     * Set the read preference.
+     *
+     * @see http://php.net/manual/en/mongocursor.setreadpreference.php
+     * @param string $readPreference
+     * @param array  $tags
+     * @return self
+     */
+    public function setReadPreference($readPreference, array $tags = null)
+    {
+        if ($tags !== null) {
+            $this->mongoCursor->setReadPreference($readPreference, $tags);
+        } else {
+            $this->mongoCursor->setReadPreference($readPreference);
+        }
+
+        $this->readPreference = $readPreference;
+        $this->readPreferenceTags = $tags;
+
+        return $this;
+    }
+
+    /**
+     * Reset the cursor and return its first result.
+     *
+     * The cursor will be reset both before and after the single result is
+     * fetched. The original cursor limit (if any) will remain in place.
+     *
+     * @see Iterator::getSingleResult()
+     * @return array|object|null
+     */
+    public function getSingleResult()
+    {
+        $originalLimit = $this->limit;
+        $this->reset();
+        $this->limit(1);
+        $result = current($this->toArray(false)) ?: null;
+        $this->reset();
+        $this->limit($originalLimit);
+        return $result;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::hasNext().
+     *
+     * @see http://php.net/manual/en/mongocursor.hasnext.php
+     * @return boolean
+     */
+    public function hasNext()
+    {
+        $cursor = $this;
+        return $this->retry(function() use ($cursor) {
+            return $cursor->getMongoCursor()->hasNext();
+        }, false);
+    }
+
+    /**
+     * Wrapper method for MongoCursor::hint().
+     *
+     * @see http://php.net/manual/en/mongocursor.hint.php
+     * @param array|string $keyPattern
+     * @return self
+     */
+    public function hint(array $keyPattern)
+    {
+        $this->hint = $keyPattern;
+        $this->mongoCursor->hint($keyPattern);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::immortal().
+     *
+     * @see http://php.net/manual/en/mongocursor.immortal.php
+     * @param boolean $liveForever
+     * @return self
+     */
+    public function immortal($liveForever = true)
+    {
+        $liveForever = (boolean) $liveForever;
+        $this->immortal = $liveForever;
+        $this->mongoCursor->immortal($liveForever);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::info().
+     *
+     * @see http://php.net/manual/en/mongocursor.info.php
+     * @return array
+     */
+    public function info()
+    {
+        return $this->mongoCursor->info();
+    }
+
+    /**
+     * Wrapper method for MongoCursor::key().
+     *
+     * @see http://php.net/manual/en/iterator.key.php
+     * @see http://php.net/manual/en/mongocursor.key.php
+     * @return string
+     */
+    public function key()
+    {
+        return $this->mongoCursor->key();
+    }
+
+    /**
+     * Wrapper method for MongoCursor::limit().
+     *
+     * @see http://php.net/manual/en/mongocursor.limit.php
+     * @param integer $num
+     * @return self
+     */
+    public function limit($num)
+    {
+        $num = (integer) $num;
+        $this->limit = $num;
+        $this->mongoCursor->limit($num);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::next().
+     *
+     * @see http://php.net/manual/en/iterator.next.php
+     * @see http://php.net/manual/en/mongocursor.next.php
+     */
+    public function next()
+    {
+        $cursor = $this;
+        $this->retry(function() use ($cursor) {
+            return $cursor->getMongoCursor()->next();
+        }, false);
+    }
+
+    /**
+     * Recreates the internal MongoCursor.
+     */
     public function recreate()
     {
         $this->mongoCursor = $this->collection->getMongoCollection()->find($this->query, $this->fields);
-        foreach ($this->hints as $hint) {
-            $this->mongoCursor->hint($hint);
+        if ($this->hint !== null) {
+            $this->mongoCursor->hint($this->hint);
         }
         if ($this->immortal !== null) {
             $this->mongoCursor->immortal($this->immortal);
@@ -120,11 +437,19 @@ class Cursor implements Iterator
         if ($this->slaveOkay !== null) {
             $this->setMongoCursorSlaveOkay($this->slaveOkay);
         }
+        // Set read preferences after slaveOkay, since they may be more specific
+        if ($this->readPreference !== null) {
+            if ($this->readPreferenceTags !== null) {
+                $this->mongoCursor->setReadPreference($this->readPreference, $this->readPreferenceTags);
+            } else {
+                $this->mongoCursor->setReadPreference($this->readPreference);
+            }
+        }
         if ($this->snapshot) {
             $this->mongoCursor->snapshot();
         }
-        foreach ($this->sorts as $sort) {
-            $this->mongoCursor->sort($sort);
+        if ($this->sort !== null) {
+            $this->mongoCursor->sort($this->sort);
         }
         if ($this->tailable !== null) {
             $this->mongoCursor->tailable($this->tailable);
@@ -135,159 +460,28 @@ class Cursor implements Iterator
     }
 
     /**
-     * Returns the MongoCursor instance being wrapped.
+     * Wrapper method for MongoCursor::reset().
      *
-     * @return MongoCursor $mongoCursor The MongoCursor instance being wrapped.
+     * @see http://php.net/manual/en/iterator.reset.php
+     * @see http://php.net/manual/en/mongocursor.reset.php
      */
-    public function getMongoCursor()
+    public function reset()
     {
-        return $this->mongoCursor;
+        $this->mongoCursor->reset();
     }
 
-    public function current()
-    {
-        $current = $this->mongoCursor->current();
-        if ($current instanceof \MongoGridFSFile) {
-            $document = $current->file;
-            $document['file'] = new GridFSFile($current);
-            $current = $document;
-        }
-        return $current;
-    }
-
-    public function key()
-    {
-        return $this->mongoCursor->key();
-    }
-
-    public function dead()
-    {
-        return $this->mongoCursor->dead();
-    }
-
-    public function explain()
-    {
-        $cursor = $this;
-        return $this->retry(function() use ($cursor) {
-            return $cursor->getMongoCursor()->explain();
-        }, true);
-    }
-
-    public function fields(array $f)
-    {
-        $this->fields = $f;
-        $this->mongoCursor->fields($f);
-        return $this;
-    }
-
-    public function getNext()
-    {
-        $cursor = $this;
-        $next = $this->retry(function() use ($cursor) {
-            return $cursor->getMongoCursor()->getNext();
-        }, false);
-        if ($next instanceof \MongoGridFSFile) {
-            $document = $next->file;
-            $document['file'] = new GridFSFile($next);
-            $next = $document;
-        }
-        return $next;
-    }
-
-    public function hasNext()
-    {
-        $cursor = $this;
-        return $this->retry(function() use ($cursor) {
-            return $cursor->getMongoCursor()->hasNext();
-        }, false);
-    }
-
-    public function hint(array $keyPattern)
-    {
-        $this->hints[] = $keyPattern;
-        $this->mongoCursor->hint($keyPattern);
-        return $this;
-    }
-
-    public function immortal($liveForever = true)
-    {
-        $liveForever = (boolean) $liveForever;
-        $this->immortal = $liveForever;
-        $this->mongoCursor->immortal($liveForever);
-        return $this;
-    }
-
-    public function info()
-    {
-        return $this->mongoCursor->info();
-    }
-
+    /**
+     * Wrapper method for MongoCursor::rewind().
+     *
+     * @see http://php.net/manual/en/iterator.rewind.php
+     * @see http://php.net/manual/en/mongocursor.rewind.php
+     */
     public function rewind()
     {
         $cursor = $this;
-        return $this->retry(function() use ($cursor) {
+        $this->retry(function() use ($cursor) {
             return $cursor->getMongoCursor()->rewind();
         }, false);
-    }
-
-    public function next()
-    {
-        $cursor = $this;
-        return $this->retry(function() use ($cursor) {
-            return $cursor->getMongoCursor()->next();
-        }, false);
-    }
-
-    public function reset()
-    {
-        return $this->mongoCursor->reset();
-    }
-
-    public function count($foundOnly = false)
-    {
-        $cursor = $this;
-        return $this->retry(function() use ($cursor, $foundOnly) {
-            return $cursor->getMongoCursor()->count($foundOnly);
-        }, true);
-    }
-
-    public function addOption($key, $value)
-    {
-        $this->options[$key] = $value;
-        $this->mongoCursor->addOption($key, $value);
-        return $this;
-    }
-
-    public function batchSize($num)
-    {
-        $limit = (integer) $num;
-        $this->batchSize = $num;
-        $this->mongoCursor->batchSize($num);
-        return $this;
-    }
-
-    public function limit($num)
-    {
-        $limit = (integer) $num;
-        $this->limit = $num;
-        $this->mongoCursor->limit($num);
-        return $this;
-    }
-
-    public function skip($num)
-    {
-        $num = (integer) $num;
-        $this->skip = $num;
-        $this->mongoCursor->skip($num);
-        return $this;
-    }
-
-    public function slaveOkay($ok = true)
-    {
-        $ok = (boolean) $ok;
-        $this->slaveOkay = $ok;
-        $this->setMongoCursorSlaveOkay($ok);
-        return $this;
     }
 
     /**
@@ -324,6 +518,42 @@ class Cursor implements Iterator
         }
     }
 
+    /**
+     * Wrapper method for MongoCursor::skip().
+     *
+     * @see http://php.net/manual/en/mongocursor.skip.php
+     * @param integer $num
+     * @return self
+     */
+    public function skip($num)
+    {
+        $num = (integer) $num;
+        $this->skip = $num;
+        $this->mongoCursor->skip($num);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::slaveOkay().
+     *
+     * @see http://php.net/manual/en/mongocursor.slaveokay.php
+     * @param boolean $ok
+     * @return self
+     */
+    public function slaveOkay($ok = true)
+    {
+        $ok = (boolean) $ok;
+        $this->slaveOkay = $ok;
+        $this->setMongoCursorSlaveOkay($ok);
+        return $this;
+    }
+
+    /**
+     * Wrapper method for MongoCursor::snapshot().
+     *
+     * @see http://php.net/manual/en/mongocursor.snapshot.php
+     * @return self
+     */
     public function snapshot()
     {
         $this->snapshot = true;
@@ -331,6 +561,13 @@ class Cursor implements Iterator
         return $this;
     }
 
+    /**
+     * Wrapper method for MongoCursor::sort().
+     *
+     * @see http://php.net/manual/en/mongocursor.sort.php
+     * @param array $fields
+     * @return self
+     */
     public function sort($fields)
     {
         foreach ($fields as $fieldName => $order) {
@@ -339,11 +576,18 @@ class Cursor implements Iterator
             }
             $fields[$fieldName] = (integer) $order;
         }
-        $this->sorts[] = $fields;
+        $this->sort = $fields;
         $this->mongoCursor->sort($fields);
         return $this;
     }
 
+    /**
+     * Wrapper method for MongoCursor::tailable().
+     *
+     * @see http://php.net/manual/en/mongocursor.tailable.php
+     * @param boolean $tail
+     * @return self
+     */
     public function tailable($tail = true)
     {
         $tail = (boolean) $tail;
@@ -352,6 +596,13 @@ class Cursor implements Iterator
         return $this;
     }
 
+    /**
+     * Wrapper method for MongoCursor::timeout().
+     *
+     * @see http://php.net/manual/en/mongocursor.timeout.php
+     * @param integer $ms
+     * @return self
+     */
     public function timeout($ms)
     {
         $this->timeout = (integer) $ms;
@@ -359,11 +610,17 @@ class Cursor implements Iterator
         return $this;
     }
 
-    public function valid()
-    {
-        return $this->mongoCursor->valid();
-    }
-
+    /**
+     * Return the cursor's results as an array.
+     *
+     * If documents in the result set use BSON objects for their "_id", the
+     * $useKeys parameter may be set to false to avoid errors attempting to cast
+     * arrays (i.e. BSON objects) to string keys.
+     *
+     * @see Iterator::toArray()
+     * @param boolean $useKeys
+     * @return array
+     */
     public function toArray($useKeys = true)
     {
         $cursor = $this;
@@ -373,50 +630,54 @@ class Cursor implements Iterator
     }
 
     /**
-     * Get the first single result from the cursor.
+     * Wrapper method for MongoCursor::valid().
      *
-     * @return array $document  The single document.
+     * @see http://php.net/manual/en/iterator.valid.php
+     * @see http://php.net/manual/en/mongocursor.valid.php
+     * @return boolean
      */
-    public function getSingleResult()
+    public function valid()
     {
-        $originalLimit = $this->limit;
-        $this->limit(1);
-        $result = current($this->toArray()) ?: null;
-        $this->reset();
-        $this->limit($originalLimit);
-        return $result;
+        return $this->mongoCursor->valid();
     }
 
+    /**
+     * Conditionally retry a closure if it yields an exception.
+     *
+     * If the closure does not return successfully within the configured number
+     * of retries, its first exception will be thrown.
+     *
+     * The $recreate parameter may be used to recreate the MongoCursor between
+     * retry attempts.
+     *
+     * @param \Closure $retry
+     * @param boolean $recreate
+     * @return mixed
+     */
     protected function retry(\Closure $retry, $recreate = false)
     {
-        if ($this->numRetries) {
-            $firstException = null;
-            for ($i = 0; $i <= $this->numRetries; $i++) {
-                $reconnect = false;
-                try {
-                    return $retry();
-                } catch (\MongoCursorTimeoutException $e) {
-                } catch (\MongoCursorException $e) {
-                } catch (\MongoConnectionException $e) {
-                    $reconnect = true;
-                }
-                if (isset($e)) {
-                    if (!$firstException) {
-                        $firstException = $e;
-                    }
-                    if ($i === $this->numRetries) {
-                        throw $firstException;
-                    }
-                    if ($recreate) {
-                        if ($reconnect) {
-                            $this->connection->initialize(true);
-                        }
-                        $this->recreate();
-                    }
-                }
-            }
-        } else {
+        if ($this->numRetries < 1) {
             return $retry();
+        }
+
+        $firstException = null;
+
+        for ($i = 0; $i <= $this->numRetries; $i++) {
+            try {
+                return $retry();
+            } catch (\MongoCursorException $e) {
+            } catch (\MongoConnectionException $e) {
+            }
+
+            if ($firstException === null) {
+                $firstException = $e;
+            }
+            if ($i === $this->numRetries) {
+                throw $firstException;
+            }
+            if ($recreate) {
+                $this->recreate();
+            }
         }
     }
 }

@@ -69,6 +69,11 @@ class PHPUnit_Extensions_Database_DataSet_AbstractTable implements PHPUnit_Exten
     protected $data;
 
     /**
+     * @var PHPUnit_Extensions_Database_DataSet_ITable|null
+     */
+    private $other;
+
+    /**
      * Sets the metadata for this table.
      *
      * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
@@ -158,7 +163,8 @@ class PHPUnit_Extensions_Database_DataSet_AbstractTable implements PHPUnit_Exten
 
         for ($i = 0; $i < $rowCount; $i++) {
             foreach ($columns as $columnName) {
-                if ($this->getValue($i, $columnName) != $other->getValue($i, $columnName)) {
+                if ($this->getValue($i, $columnName) !== $other->getValue($i, $columnName)) {
+                    $this->other = $other;
                     return FALSE;
                 }
             }
@@ -197,13 +203,29 @@ class PHPUnit_Extensions_Database_DataSet_AbstractTable implements PHPUnit_Exten
             $values = array();
 
             foreach ($columns as $columnName) {
-                $values[] = $this->getValue($i, $columnName);
+                if ($this->other) {
+                    try {
+                        if ($this->getValue($i, $columnName) != $this->other->getValue($i, $columnName)) {
+                            $values[] = sprintf(
+                                '%s != actual %s',
+                                var_export($this->getValue($i, $columnName), TRUE),
+                                var_export($this->other->getValue($i, $columnName), TRUE)
+                            );
+                        } else {
+                            $values[] = $this->getValue($i, $columnName);
+                        }
+                    } catch (\InvalidArgumentException $ex) {
+                        $values[] = $this->getValue($i, $columnName) . ': no row';
+                    }
+                } else {
+                    $values[] = $this->getValue($i, $columnName);
+                }
             }
 
             $tableString .= $this->rowToString($values) . $lineSeperator;
         }
 
-        return "\n" . $tableString . "\n";
+        return ($this->other ? '(table diff enabled)' : '') . "\n" . $tableString . "\n";
     }
 
     protected function rowToString(Array $row)

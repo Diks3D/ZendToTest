@@ -6,15 +6,15 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  *  @ORM\Entity
  *  @ORM\Table(name="z2t_user")
- *  @ORM\HasLifecycleCallbacks()
+ *  @ORM\HasLifecycleCallbacks
  */
 class User
 {
     /**
      * @ORM\Id
-     * @ORM\OneToMany(targetEntity="Message", cascade={"ALL"})
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @ORM\OneToMany(targetEntity="Dashboard\Entity\Message", cascade={"persist", "remove", "merge"})
      */
     protected $id;
     
@@ -38,20 +38,23 @@ class User
      */
     protected $fullName;
     
-    /** @ORM\Column(name="info_xml", type="text")
-     * @var string
+    /**
+     * @ORM\Column(name="info_xml", type="text")
      */
     protected $info;
 
-   /**
-     *  @ORM\Column(type="datetime")
-     *  @var \DateTime
+    /**
+     * @ORM\Column(type="datetime", name="create_at")
      */
     protected $created;
     
     /**
-     *  @ORM\Column(name="last_login", type="datetime")
-     *  @var \DateTime
+     * @ORM\Column(type="datetime", name="update_at")
+     */
+    protected $updated;
+    
+    /**
+     * @ORM\Column(type="datetime", name="last_login")
      */
     protected $lastLogin;
 
@@ -61,6 +64,14 @@ class User
     public function setCreatedValue()
     {
         $this->created = new \DateTime();
+    }
+    
+    /**
+     * @ORM\preUpdate
+     */
+    public function setUpdatedValue()
+    {
+        $this->updated = new \DateTime();
     }
     
     /**
@@ -230,8 +241,11 @@ class User
      * @param \DateTime $created
      * @return User
      */
-    public function setCreated($created)
+    public function setCreated($created = null)
     {
+        if(is_null($created)){
+            $created = new \Datetime();
+        }
         $this->created = $created;
     
         return $this;
@@ -248,13 +262,42 @@ class User
     }
 
     /**
+     * Set updated
+     *
+     * @param \DateTime $updated
+     * @return User
+     */
+    public function setUpdated($updated = null)
+    {
+        if(is_null($updated)){
+            $updated = new \Datetime();
+        }
+        $this->updated = $updated;
+    
+        return $this;
+    }
+
+    /**
+     * Get updated
+     *
+     * @return \DateTime 
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    /**
      * Set lastLogin
      *
      * @param \DateTime $lastLogin
      * @return User
      */
-    public function setLastLogin($lastLogin)
+    public function setLastLogin($lastLogin = null)
     {
+        if(is_null($lastLogin)){
+            $lastLogin = new \Datetime();
+        }
         $this->lastLogin = $lastLogin;
     
         return $this;
