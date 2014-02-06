@@ -2,14 +2,14 @@
 
 namespace Money\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController,
-    Zend\View\Model\ViewModel;
+use Zend\View\Model\ViewModel;
+use Application\Controller\AbstractController;
 
-class IndexController extends AbstractActionController
+class IndexController extends AbstractController
 {
     public function indexAction()
     {
-        //$em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $em = $this->getEntityManager();
         //$messages = $em->getRepository('Money\Entity\Message');
         return new ViewModel(array(
         ));

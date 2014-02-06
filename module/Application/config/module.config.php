@@ -92,6 +92,7 @@ return array(
         ),
         'aliases' => array(
             'translator' => 'MvcTranslator',
+            'EntityManager' => 'doctrine.entitymanager.orm_default',
         ),
     ),
     'translator' => array(

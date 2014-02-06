@@ -32,6 +32,7 @@ class User
      * @ORM\Column(name="pass_hash", type="string", length=40)
      */
     protected $passHash;
+    protected $salt;
     
     /** 
      * @ORM\Column(name="full_name", type="string")
@@ -42,6 +43,11 @@ class User
      * @ORM\Column(name="info_xml", type="text")
      */
     protected $info;
+    
+    /**
+     * @ORM\OneToMany(targetEntity="MoneyAccount", mappedBy="user")
+     */
+    protected $moneyAccounts;
 
     /**
      * @ORM\Column(type="datetime", name="create_at")
@@ -64,6 +70,7 @@ class User
     public function setCreatedValue()
     {
         $this->created = new \DateTime();
+        $this->updated = new \DateTime();
     }
     
     /**
@@ -175,7 +182,7 @@ class User
     public function setPassHash($passHash)
     {
         $this->passHash = $passHash;
-    
+        
         return $this;
     }
 
@@ -187,6 +194,19 @@ class User
     public function getPassHash()
     {
         return $this->passHash;
+    }
+    
+    /**
+     * Set Password
+     * 
+     * @param string $password
+     * @return User
+     */
+    public function setPassword($password){
+        
+        $this->passHash = sha1($this->salt . $password);
+        
+        return $this;
     }
 
     /**
@@ -311,5 +331,47 @@ class User
     public function getLastLogin()
     {
         return $this->lastLogin;
+    }
+    
+    /**
+     * Constructor
+     */
+    public function __construct($userPasswordSalt = 'd3rttwst')
+    {
+        $this->salt = $userPasswordSalt;
+        $this->moneyAccounts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+    
+    /**
+     * Add moneyAccounts
+     *
+     * @param \Application\Entity\MoneyAccount $moneyAccounts
+     * @return User
+     */
+    public function addMoneyAccount(\Application\Entity\MoneyAccount $moneyAccounts)
+    {
+        $this->moneyAccounts[] = $moneyAccounts;
+    
+        return $this;
+    }
+
+    /**
+     * Remove moneyAccounts
+     *
+     * @param \Application\Entity\MoneyAccount $moneyAccounts
+     */
+    public function removeMoneyAccount(\Application\Entity\MoneyAccount $moneyAccounts)
+    {
+        $this->moneyAccounts->removeElement($moneyAccounts);
+    }
+
+    /**
+     * Get moneyAccounts
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getMoneyAccounts()
+    {
+        return $this->moneyAccounts;
     }
 }

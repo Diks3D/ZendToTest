@@ -42,6 +42,11 @@ class User
      * @ORM\Column(name="info_xml", type="text")
      */
     protected $info;
+    
+    /**
+     * @ORM\OneToMany(targetEntity="MoneyAccount", mappedBy="user")
+     */
+    protected $moneyAccounts;
 
     /**
      * @ORM\Column(type="datetime", name="create_at")

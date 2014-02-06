@@ -9,8 +9,8 @@ use Money\Model\Client\YandexOAuthClient;
 
 class Yandex
 {
-    protected $_oAuthSdk = null;
-    protected $_accessToken = '41001260517056.42D53FFA341DA55D980E16D95AF3CE0941F415C607925677BB0D2B1444A2EC1457FF8E0E7DA764DB116268C184D438246B6B0AAF435656C93B42011E214192857083DA2B23D2772A264C6F14785A0E04D66533E58F441212130B17C61A80A8FB46808AE1ED87E32756F1484E279126E6F0B4A9B66AC7E5F5F8E2200A69DC1413';
+    protected $oAuthSdk = null;
+    protected $accessToken = null;
 
 
     /**
@@ -18,7 +18,7 @@ class Yandex
      */
     public function __construct()
     {
-        $this->_oAuthSdk = static::_getOAuthSDK();
+        $this->oAuthSdk = static::_getOAuthSDK();
     }
     
     /**
@@ -65,10 +65,10 @@ class Yandex
     public function getAccessToken($code)
     {
         try {
-            $result = $this->_oAuthSdk->getAccessTokenByAuth($code);
+            $result = $this->oAuthSdk->getAccessTokenByAuth($code);
             $accessToken = $result->access_token;
             return $accessToken;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             var_dump($e); exit;
         }
     }
@@ -83,11 +83,10 @@ class Yandex
     {
         try {
             if (!is_null($accessToken)) {
-                $this->_oAuthSdk->setAccessToken($accessToken);
+                $this->oAuthSdk->setAccessToken($accessToken);
             }
-            $result = $this->_oAuthSdk->getProfile();
-            return $result;
-        } catch (Exception $e) {
+            return $this->oAuthSdk->getProfile();
+        } catch (\Exception $e) {
             var_dump($e); exit;
         }
     }

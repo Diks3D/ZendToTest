@@ -2,14 +2,14 @@
 
 namespace Application\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
 use Zend\Authentication\AuthenticationService;
-use Application\Form\AuthForm;
-use Application\Model\Auth\Adapter\User as UserAuthAdapter;
-use Application\Model\Auth\Adapter\Admin as AdminAuthAdapter;
 
-class AuthController extends AbstractActionController
+use Application\Controller\AbstractController,
+    Application\Form\AuthForm,
+    Application\Model\Auth\Adapter\User as UserAuthAdapter,
+    Application\Model\Auth\Adapter\Admin as AdminAuthAdapter;
+
+class AuthController extends AbstractController
 {
     public function authAction()
     {

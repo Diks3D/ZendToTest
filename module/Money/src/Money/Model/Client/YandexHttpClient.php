@@ -2,9 +2,7 @@
 
 namespace Money\Model\Client;
 
-use Zend\Http\Request,
-    Zend\Http\Client,
-    Zend\Http\Client as ZendHttpClient;
+use Zend\Http\Client as ZendHttpClient;
 
 /**
  * HTTP Client for Yandex Services
@@ -16,13 +14,13 @@ class YandexHttpClient
     /**
      * Transpot function
      * 
-     * @param type $url
-     * @param type $params
-     * @param type $method
-     * @param type $headers
-     * @param type $data
+     * @param string $url
+     * @param array $params
+     * @param string $method
+     * @param array $headers
+     * @param string $data
      * 
-     * @return array $out - Object of code, message , array of headers, body of response 
+     * @return object $out - Object of code, message , array of headers, body of response 
      * 
      * @throws YandexHttpClientException
      */
@@ -32,48 +30,58 @@ class YandexHttpClient
         $client->setOptions(array(
             'maxredirects' => 0,
             'timeout' => 30,
-            'sslverifypeer' => false
+            'sslverifypeer' => false,
         ));
-
+        
         switch ($method) {
             case 'POST':
                 if (!$data) {
                     $client->setParameterPost($params);
                 } else {
-                    if ($params)
+                    if ($params){
                         $url = $url . '?' . http_build_query($params);
-                    if ($data)
+                    }
+                    if ($data){
                         $client->setRawData($data);
+                    }
                 }
                 break;
             case 'PUT':
-                if ($params)
+                if ($params){
                     $url = $url . '?' . http_build_query($params);
+                }
                 $headers[] = ('X-HTTP-Method-Override: PUT');
                 $client->setRawData($data);
                 break;
             case 'GET':
-                if ($params)
+                if ($params){
                     $client->setParameterGet($params);
+                }
                 break;
             case 'DELETE':
             case 'MOVE':
             case 'COPY':
             default:
-                if ($params)
+                if ($params){
                     $url = $url . '?' . http_build_query($params, null, '&', 'PHP_QUERY_RFC3986');
-                if ($data)
+                }
+                if ($data){
                     $client->setRawData($data);
+                }
                 break;
         }
         $client->setUri($url);
-        //$client->setHeaders($headers);
+        $client->setHeaders($headers);
         $client->setMethod($method);
 
         // Transfer ang get response
-        $client->send();
+        try{
+            $client->send();
+        } catch (\Exception $ex) {
+            throw new YandexHttpClientException($ex->getMessage(), 504);
+        }
         $response = $client->getResponse();
-        
+
         //First parsing
         $code = $response->getStatusCode();
         $message = $response->getReasonPhrase();
@@ -89,8 +97,6 @@ class YandexHttpClient
         if (!$response->isOk()) {
             throw new YandexHttpClientException($message, $code);
         }
-        
-        
 
         $out = new \stdClass();
         $out->code = $code;

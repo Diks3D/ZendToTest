@@ -1,6 +1,10 @@
 <?php
-$title = 'Money';
+$title = 'Yandex Money';
 $this->headTitle($title);
-$role = $this->layout()->role;
 ?>
-<iframe frameborder="0" allowtransparency="true" scrolling="no" src="https://money.yandex.ru/embed/shop.xml?account=410012149571899&quickpay=shop&payment-type-choice=on&writer=seller&targets=%D0%9E%D0%BD%D0%BB%D0%B0%D0%B9%D0%BD+%D1%80%D0%B0%D1%81%D0%BA%D0%BB%D0%B0%D0%B4+%D0%BA%D0%B0%D1%80%D1%82+%D0%A2%D0%90%D0%A0%D0%9E&targets-hint=&default-sum=600&button-text=01&mail=on&phone=on" width="450" height="200"></iframe>
+<a href="<?= $yandexMoneyAuthUrl ?>"><div class="btn btn-success">Add new Account</div></a>
+<?php if(count($yandexMoneyAccounts) == 0): ?>
+    <div class="error-panel text-error">You have nothing Yandex Money Accounts</div>
+<?php else: ?>
+    
+<?php endif;

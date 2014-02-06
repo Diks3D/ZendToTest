@@ -99,11 +99,11 @@ class YandexOAuthClient
     }
     
     public function getProfile(){
-        $params = array(
-            'format' => 'json',
-            'oauth_token' => $this->_accessToken,
+        $headers = array(
+            'Authorization: Bearer ' . $this->_accessToken,
+            'Content-Length: 0',
         );
-        return $this->_httpClient->sendRequest(self::API_LOGIN_URL, $params)->body;
+        return $this->_httpClient->sendRequest(self::API_LOGIN_URL, array(), 'POST', $headers)->body;
     }
 
 }

@@ -1,11 +1,13 @@
 <?php
 namespace Admin\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-//    Zend\View\Model\ViewModel;
-//use DoctrineORMModule\Stdlib\Hydrator\DoctrineEntity;
+use Zend\Mvc\Controller\AbstractActionController,
+    Zend\View\Model\ViewModel;
+use DoctrineORMModule\Stdlib\Hydrator\DoctrineEntity,
+    DoctrineModule\Stdlib\Hydrator\DoctrineObject;
 use Application\Entity\User,
-    Application\Form\UserForm;
+    Application\Form\UserForm,
+    Application\Form\UserFormFilter;
 
 
 class UserController extends AbstractActionController
@@ -22,33 +24,30 @@ class UserController extends AbstractActionController
 
     public function addAction()
     {
+        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        
+        $user = new User();
         $form = new UserForm();
+        $filter = new UserFormFilter();
+        $hydrator = new DoctrineObject($em, '\Application\Entity\User');
+        $form->setInputFilter($filter->getInputFilter());
+        $form->setHydrator($hydrator);
         $form->get('submit')->setValue('Add User');
+        $form->bind($user);
 
         $request = $this->getRequest();
         if ($request->isPost()) {
-            
-            //$filter = new UserFormFilter();
-            //$form->setInputFilter($filter->getInputFilter());
             $form->setData($request->getPost());
             if ($form->isValid()) {
-                $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-                $formData = $form->getData();
-
-                $user = new User();
-                $user->login = $formData['login'];
-                $user->email = $formData['email'];
-                $user->passHash = md5($formData['password']);
-                $user->fullName = $formData['fullname'];
                 $em->persist($user);
                 try{
-                $em->flush();
+                    $em->flush();
                 } catch(\Doctrine\DBAL\DBALException $e){
-                    $form->setMessages(array('login' => array('User with this login or email is exists')));
+                    $form->setMessages(array(
+                        'login' => array('User with this login or email is exists')
+                        ));
                     return array('form' => $form);
                 }
-
-                // Redirect to list of albums
                 return $this->redirect()->toRoute('admin/usermanage');
             }
         }

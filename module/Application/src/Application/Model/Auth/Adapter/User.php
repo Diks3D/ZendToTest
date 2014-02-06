@@ -7,6 +7,8 @@ use Zend\Authentication\Adapter\AdapterInterface;
 
 class User implements AdapterInterface
 {
+    /** @var $_salt */
+    protected $_salt = 'd3rttwst';
     /** @var \EntityManager */
     protected $em;
 
@@ -38,7 +40,7 @@ class User implements AdapterInterface
         $queryString = "select u from Application\Entity\User u where u.login = '{$this->login}' or u.email = '{$this->login}'";
         $result = $this->em->createQuery($queryString)->setMaxResults(1)->getResult();
         if(count($result) !== 0
-            && md5($this->password) === $result[0]->getPassHash()){
+            && sha1($this->_salt . $this->password) === $result[0]->getPassHash()){
             return new Result(Result::SUCCESS, $result[0], array('Authentificate success'));
         } else {
             return new Result(Result::FAILURE, null, array('Pairs login/password are not correct'));

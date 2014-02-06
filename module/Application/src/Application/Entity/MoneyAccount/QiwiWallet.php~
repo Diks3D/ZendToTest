@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  *  @ORM\Entity
  */
-class YandexMoney extends \Application\Entity\MoneyAccount
+class QiwiWallet extends \Application\Entity\MoneyAccount
 {
-    protected $walletType;
+
 }

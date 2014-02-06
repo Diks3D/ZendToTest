@@ -191,7 +191,7 @@ class MoneyAccount
      * @param \Application\Entity\User $user
      * @return MoneyAccount
      */
-    public function setUser(\Application\Entity\User $user)
+    public function setUser(\Application\Entity\User $user = null)
     {
         $this->user = $user;
     
@@ -206,10 +206,5 @@ class MoneyAccount
     public function getUser()
     {
         return $this->user;
-    }
-    
-    public function __construct(\Application\Entity\User $user)
-    {
-        $this->setUser($user);
     }
 }
